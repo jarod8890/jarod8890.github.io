@@ -1,0 +1,2183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes Délices — Pâtisserie & Livraison</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sage:#8a9e7e;--sage-pale:#e8ede5;--blush:#e8c5b8;--blush-deep:#d4998a;
+  --cream:#faf7f3;--ivory:#f2ede6;--gold:#c8a96e;--gold-light:#e2c98a;
+  --charcoal:#2c2c2c;--text-mid:#5a5248;--text-light:#9a9288;--white:#ffffff;
+  --alert:#e05a5a;--alert-pale:#fdeaea;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--charcoal);overflow-x:hidden;cursor:none;}
+.cur{position:fixed;width:8px;height:8px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s;mix-blend-mode:multiply;}
+.cur-f{position:fixed;width:32px;height:32px;border:1.5px solid var(--gold);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:transform .5s cubic-bezier(.22,1,.36,1),opacity .3s,width .3s,height .3s;opacity:.6;}
+body:hover .cur{width:10px;height:10px;}
+.hovering .cur{width:40px;height:40px;mix-blend-mode:normal;background:rgba(200,169,110,.15);}
+.hovering .cur-f{opacity:0;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
+
+/* ─── NOTIFICATION STACK (remplace l'ancien toast) ─── */
+.notif-container{position:fixed;bottom:2rem;right:2rem;z-index:9500;display:flex;flex-direction:column-reverse;gap:.6rem;max-width:360px;pointer-events:none;}
+.notif-item{background:var(--charcoal);color:var(--white);padding:.8rem 1rem .8rem 1.2rem;display:flex;align-items:flex-start;gap:.75rem;font-size:.78rem;letter-spacing:.04em;box-shadow:0 10px 40px rgba(0,0,0,.28);transform:translateX(120%);transition:transform .4s cubic-bezier(.22,1,.36,1);pointer-events:all;line-height:1.5;border-left:3px solid var(--gold);max-width:360px;}
+.notif-item.show{transform:translateX(0);}
+.notif-ico{font-size:1rem;flex-shrink:0;margin-top:.05rem;}
+.notif-msg{flex:1;}
+.notif-close{background:none;border:none;color:rgba(255,255,255,.35);cursor:pointer;font-size:.75rem;padding:.1rem .2rem;flex-shrink:0;transition:color .2s;margin-top:.05rem;line-height:1;}
+.notif-close:hover{color:white;}
+.notif-clear-all{position:fixed;bottom:calc(2rem - 1.6rem);right:2rem;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-light);cursor:pointer;z-index:9501;background:none;border:none;font-family:'Jost',sans-serif;transition:color .3s;display:none;}
+.notif-clear-all:hover{color:var(--charcoal);}
+
+/* ─── FLOATING HELP BUTTON ─── */
+.float-help{position:fixed;bottom:2rem;left:2rem;background:var(--charcoal);border:1px solid var(--gold);color:var(--gold);padding:.65rem 1.2rem;cursor:pointer;font-family:'Jost',sans-serif;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;display:flex;align-items:center;gap:.5rem;z-index:8000;transition:all .35s;box-shadow:0 6px 24px rgba(0,0,0,.18);}
+.float-help:hover{background:var(--gold);color:var(--charcoal);}
+
+/* ─── CHAT MESSAGES ─── */
+.chat-msg{display:flex;gap:.7rem;margin-bottom:.85rem;align-items:flex-start;}
+.chat-msg.chat-user{flex-direction:row-reverse;}
+.chat-av{width:32px;height:32px;background:var(--blush);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.chat-bubble{background:var(--white);padding:.65rem .95rem;font-size:.79rem;line-height:1.65;color:var(--text-mid);max-width:82%;border:1px solid rgba(200,169,110,.15);}
+.chat-msg.chat-user .chat-bubble{background:var(--charcoal);color:var(--white);border-color:transparent;}
+.chat-typing{display:flex;gap:.3rem;align-items:center;padding:.5rem .8rem;}
+.chat-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;animation:chatDot 1.2s infinite;}
+.chat-dot:nth-child(2){animation-delay:.2s;}
+.chat-dot:nth-child(3){animation-delay:.4s;}
+@keyframes chatDot{0%,100%{opacity:.3;transform:translateY(0);}50%{opacity:1;transform:translateY(-3px);}}
+
+/* ─── PRELOADER ─── */
+.preloader{position:fixed;inset:0;background:var(--charcoal);z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity .8s .3s,visibility .8s .3s;}
+.preloader.done{opacity:0;visibility:hidden;}
+.pre-logo{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--white);letter-spacing:.2em;opacity:0;animation:preIn 1s .2s forwards;}
+.pre-logo span{color:var(--gold);font-style:italic;}
+.pre-line{width:0;height:1px;background:var(--gold);margin:.8rem auto 0;animation:preLine 1.2s .8s forwards;}
+@keyframes preIn{to{opacity:1;}}
+@keyframes preLine{to{width:120px;}}
+
+/* ─── HEADER ─── */
+header{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:0 4rem;height:80px;background:rgba(250,247,243,0);backdrop-filter:blur(0px);transition:all .5s;}
+header.bg{background:rgba(250,247,243,.96);backdrop-filter:blur(16px);border-bottom:1px solid rgba(200,169,110,.2);height:68px;box-shadow:0 4px 40px rgba(0,0,0,.05);}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:400;letter-spacing:.18em;color:var(--charcoal);cursor:pointer;text-decoration:none;}
+.logo span{color:var(--gold);font-style:italic;}
+nav{display:flex;gap:2.2rem;}
+nav a{font-size:.68rem;font-weight:300;letter-spacing:.22em;text-transform:uppercase;color:var(--text-mid);text-decoration:none;position:relative;padding-bottom:3px;transition:color .3s;cursor:pointer;}
+nav a::after{content:'';position:absolute;bottom:0;left:50%;width:0;height:1px;background:var(--gold);transition:all .4s;transform:translateX(-50%);}
+nav a:hover{color:var(--charcoal);}
+nav a:hover::after{width:100%;left:0;transform:none;}
+.h-actions{display:flex;align-items:center;gap:1.2rem;}
+.ico-btn{background:none;border:none;cursor:pointer;color:var(--text-mid);transition:color .3s,transform .3s;padding:4px;position:relative;}
+.ico-btn:hover{color:var(--charcoal);transform:scale(1.1);}
+.ico-btn svg{width:19px;height:19px;display:block;}
+.cbadge{position:absolute;top:-5px;right:-5px;background:var(--gold);color:var(--white);width:17px;height:17px;border-radius:50%;font-size:.58rem;display:flex;align-items:center;justify-content:center;font-family:'Jost',sans-serif;}
+.solde-badge{background:var(--sage-pale);border:1px solid rgba(138,158,126,.4);padding:.25rem .7rem;font-size:.65rem;letter-spacing:.12em;color:var(--sage);font-family:'Jost',sans-serif;display:none;align-items:center;gap:.4rem;cursor:pointer;transition:background .3s;}
+.solde-badge:hover{background:rgba(138,158,126,.18);}
+.solde-badge.show{display:flex;}
+.livreur-badge{background:var(--charcoal);border:1px solid var(--gold);padding:.25rem .7rem;font-size:.65rem;letter-spacing:.12em;color:var(--gold);font-family:'Jost',sans-serif;display:none;align-items:center;gap:.4rem;cursor:pointer;transition:background .3s;}
+.livreur-badge:hover{background:rgba(200,169,110,.15);}
+.livreur-badge.show{display:flex;}
+
+/* ─── HERO ─── */
+.hero{min-height:100vh;position:relative;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;}
+.hero-l{background:var(--sage-pale);display:flex;flex-direction:column;justify-content:center;padding:110px 5rem 80px 7rem;position:relative;overflow:hidden;z-index:1;}
+.hero-l::before{content:'';position:absolute;top:-120px;left:-80px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(181,201,170,.35) 0%,transparent 65%);pointer-events:none;}
+.hero-l::after{content:'✦';position:absolute;bottom:8rem;right:3rem;font-size:.9rem;color:var(--gold);opacity:.4;animation:spin 20s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.hero-eyebrow{display:flex;align-items:center;gap:1rem;margin-bottom:1.8rem;}
+.hero-eyebrow::before{content:'';width:36px;height:1px;background:var(--gold);}
+.hero-eyebrow span{font-size:.65rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);}
+.hero-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3.2rem,5.5vw,5.5rem);font-weight:300;line-height:1.05;color:var(--charcoal);margin-bottom:1.6rem;}
+.hero-h1 em{font-style:italic;color:var(--sage);}
+.hero-h1 strong{font-weight:600;}
+.hero-p{font-size:.85rem;line-height:1.95;color:var(--text-mid);max-width:370px;margin-bottom:2.6rem;font-weight:300;}
+.hero-btns{display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap;}
+.btn-p{display:inline-flex;align-items:center;gap:.7rem;background:var(--charcoal);color:var(--white);padding:.95rem 2rem;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;border:none;cursor:pointer;font-family:'Jost',sans-serif;transition:all .4s;position:relative;overflow:hidden;}
+.btn-p::before{content:'';position:absolute;inset:0;background:var(--gold);transform:translateX(-101%);transition:transform .4s cubic-bezier(.22,1,.36,1);}
+.btn-p:hover::before{transform:translateX(0);}
+.btn-p span,.btn-p svg{position:relative;z-index:1;}
+.btn-ghost{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--text-mid);border:none;background:none;cursor:pointer;display:flex;align-items:center;gap:.5rem;transition:color .3s;font-family:'Jost',sans-serif;}
+.btn-ghost:hover{color:var(--charcoal);}
+.hero-stats{display:flex;gap:2.5rem;margin-top:3rem;padding-top:2rem;border-top:1px solid rgba(200,169,110,.25);}
+.hero-stat-num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:var(--charcoal);line-height:1;}
+.hero-stat-lbl{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-light);margin-top:.2rem;}
+.hero-r{background:linear-gradient(135deg,#f4ddd4 0%,var(--blush) 40%,#e0b8a8 100%);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.hero-r::before{content:'';position:absolute;top:50%;left:50%;width:600px;height:600px;border-radius:50%;border:1px solid rgba(255,255,255,.25);transform:translate(-50%,-50%);animation:pulse 4s ease-in-out infinite;}
+.hero-r::after{content:'';position:absolute;top:50%;left:50%;width:420px;height:420px;border-radius:50%;border:1px solid rgba(255,255,255,.15);transform:translate(-50%,-50%);animation:pulse 4s 1s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1);}50%{transform:translate(-50%,-50%) scale(1.04);}}
+.hero-cake-wrap{position:relative;z-index:2;animation:float 6s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-20px)}}
+.hero-cake-svg{width:320px;height:320px;filter:drop-shadow(0 30px 50px rgba(0,0,0,.18));}
+.hero-badge{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.85);backdrop-filter:blur(12px);padding:.75rem 1.6rem;border:1px solid rgba(200,169,110,.3);font-family:'Cormorant Garamond',serif;font-size:1rem;font-style:italic;color:var(--charcoal);white-space:nowrap;z-index:3;}
+.hero-deco-1{position:absolute;top:2rem;right:2rem;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5);writing-mode:vertical-rl;z-index:3;}
+.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.4rem;z-index:10;color:var(--text-light);font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;}
+.scroll-line{width:1px;height:44px;background:linear-gradient(to bottom,transparent,var(--gold));animation:sLine 2.2s ease-in-out infinite;}
+@keyframes sLine{0%{transform:scaleY(0);transform-origin:top;opacity:0}50%{transform:scaleY(1);transform-origin:top;opacity:1}51%{transform:scaleY(1);transform-origin:bottom;opacity:1}100%{transform:scaleY(0);transform-origin:bottom;opacity:0}}
+
+/* ─── MARQUEE ─── */
+.mq-wrap{background:var(--gold);overflow:hidden;padding:.65rem 0;position:relative;z-index:2;}
+.mq-track{display:flex;white-space:nowrap;animation:mq 28s linear infinite;}
+.mq-item{font-size:.62rem;letter-spacing:.32em;text-transform:uppercase;color:var(--white);padding:0 2.8rem;opacity:.92;}
+.mq-dot{color:rgba(255,255,255,.45);margin:0 .4rem;}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ─── SECTIONS ─── */
+.sec{padding:110px 7rem;}
+.sh{text-align:center;margin-bottom:4.5rem;}
+.sh-tag{font-size:.65rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:1rem;}
+.sh-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,4vw,3.4rem);font-weight:300;color:var(--charcoal);line-height:1.15;}
+.sh-title em{font-style:italic;color:var(--sage);}
+.sh-line{width:36px;height:1px;background:var(--gold);margin:1.4rem auto 0;}
+.sh-sub{font-size:.83rem;color:var(--text-light);max-width:480px;margin:.8rem auto 0;line-height:1.8;font-weight:300;}
+
+/* ─── CATEGORIES ─── */
+.cat-sec{background:var(--ivory);}
+.cat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1.2rem;}
+.cat-card{position:relative;overflow:hidden;cursor:pointer;aspect-ratio:.72;border-radius:2px;transition:transform .6s cubic-bezier(.22,1,.36,1),box-shadow .6s;}
+.cat-card:hover{transform:translateY(-10px);box-shadow:0 30px 60px rgba(0,0,0,.12);}
+.cat-bg{position:absolute;inset:0;transition:transform .7s cubic-bezier(.22,1,.36,1);}
+.cat-card:hover .cat-bg{transform:scale(1.08);}
+.cb1{background:linear-gradient(160deg,#f0e8f5,#c8b0e0);}
+.cb2{background:linear-gradient(160deg,#fce8e8,#eeaaaa);}
+.cb3{background:linear-gradient(160deg,#e8f0e8,#aaceaa);}
+.cb4{background:linear-gradient(160deg,#fef3e2,#f0d070);}
+.cb5{background:linear-gradient(160deg,#e8f0f5,#98c0e0);}
+.cat-em{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:5rem;z-index:2;transition:transform .7s cubic-bezier(.22,1,.36,1),filter .5s;}
+.cat-card:hover .cat-em{transform:scale(1.18) translateY(-6px);filter:drop-shadow(0 12px 24px rgba(0,0,0,.15));}
+.cat-info{position:absolute;bottom:0;left:0;right:0;padding:1.8rem 1.4rem 1.4rem;background:linear-gradient(to top,rgba(0,0,0,.45) 0%,transparent 100%);z-index:3;transform:translateY(4px);transition:transform .4s;}
+.cat-card:hover .cat-info{transform:translateY(0);}
+.cat-name{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--white);display:block;margin-bottom:.2rem;}
+.cat-cnt{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.65);}
+
+/* ─── PRODUCTS ─── */
+.fbar{display:flex;justify-content:center;margin-bottom:3rem;border-bottom:1px solid rgba(200,169,110,.18);}
+.fb{font-size:.67rem;letter-spacing:.2em;text-transform:uppercase;padding:.8rem 1.6rem;border:none;background:none;cursor:pointer;color:var(--text-light);position:relative;transition:color .3s;font-family:'Jost',sans-serif;}
+.fb.on,.fb:hover{color:var(--charcoal);}
+.fb.on::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--gold);}
+.pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.8rem;}
+.pc{background:var(--white);position:relative;overflow:hidden;cursor:pointer;transition:box-shadow .5s,transform .5s;}
+.pc:hover{box-shadow:0 24px 64px rgba(0,0,0,.1);transform:translateY(-4px);}
+.pc-img{position:relative;aspect-ratio:1;overflow:hidden;background:var(--ivory);display:flex;align-items:center;justify-content:center;}
+.pc-em{font-size:5.5rem;transition:transform .6s cubic-bezier(.22,1,.36,1);filter:drop-shadow(0 8px 20px rgba(0,0,0,.1));}
+.pc:hover .pc-em{transform:scale(1.14) rotate(-3deg);}
+.pc-bdg{position:absolute;top:.9rem;left:.9rem;color:var(--white);font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;padding:.28rem .7rem;font-family:'Jost',sans-serif;}
+.bdg-gold{background:var(--gold);}
+.bdg-sage{background:var(--sage);}
+.bdg-blush{background:var(--blush-deep);}
+.pc-body{padding:1.3rem;}
+.pc-name{font-family:'Cormorant Garamond',serif;font-size:1.08rem;color:var(--charcoal);margin-bottom:.25rem;}
+.pc-desc{font-size:.72rem;color:var(--text-light);line-height:1.65;margin-bottom:.8rem;}
+.pc-foot{display:flex;align-items:center;justify-content:space-between;}
+.pc-price{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--charcoal);}
+.pc-price small{font-size:.65rem;color:var(--text-light);font-family:'Jost',sans-serif;display:block;margin-top:.1rem;}
+.pc-stars{font-size:.7rem;color:var(--gold);}
+.badd{width:34px;height:34px;border-radius:50%;background:var(--charcoal);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--white);transition:background .3s,transform .4s;}
+.badd:hover{background:var(--gold);transform:rotate(90deg) scale(1.1);}
+.badd svg{width:15px;height:15px;}
+
+/* ─── CTA BANNER ─── */
+.cta-banner{margin:0 7rem 110px;background:var(--charcoal);padding:5.5rem 6rem;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;position:relative;overflow:hidden;}
+.cta-banner::before{content:'';position:absolute;top:-40%;right:-5%;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(200,169,110,.2) 0%,transparent 65%);}
+.cta-banner::after{content:'✦';position:absolute;bottom:3rem;left:50%;font-size:.9rem;color:rgba(200,169,110,.3);letter-spacing:.4rem;}
+.ban-tag{font-size:.62rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;}
+.ban-h{font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:300;color:var(--white);line-height:1.18;margin-bottom:1.4rem;}
+.ban-p{font-size:.82rem;line-height:1.9;color:rgba(255,255,255,.55);margin-bottom:2rem;font-weight:300;}
+.btn-o{display:inline-flex;align-items:center;gap:.7rem;border:1px solid var(--gold);color:var(--gold);padding:.95rem 2rem;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;cursor:pointer;background:none;font-family:'Jost',sans-serif;transition:all .4s;position:relative;overflow:hidden;}
+.btn-o::before{content:'';position:absolute;inset:0;background:var(--gold);transform:translateX(-101%);transition:transform .4s cubic-bezier(.22,1,.36,1);}
+.btn-o:hover::before{transform:translateX(0);}
+.btn-o:hover{color:var(--charcoal);}
+.btn-o span,.btn-o svg{position:relative;z-index:1;}
+.ban-vis{font-size:9rem;animation:float 5s ease-in-out infinite;filter:drop-shadow(0 20px 40px rgba(0,0,0,.4));display:flex;align-items:center;justify-content:center;position:relative;z-index:1;}
+
+/* ─── PROCESS ─── */
+.proc-sec{background:var(--ivory);}
+.proc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid rgba(200,169,110,.15);}
+.proc-step{padding:2.8rem 2rem;text-align:center;position:relative;border-right:1px solid rgba(200,169,110,.15);transition:background .4s;}
+.proc-step:last-child{border-right:none;}
+.proc-step:hover{background:rgba(200,169,110,.05);}
+.pnum{font-family:'Cormorant Garamond',serif;font-size:4.5rem;font-weight:300;color:rgba(200,169,110,.15);line-height:1;position:absolute;top:1.5rem;right:1.5rem;}
+.picon{font-size:2.8rem;margin-bottom:1rem;}
+.pname{font-family:'Cormorant Garamond',serif;font-size:1.15rem;margin-bottom:.6rem;color:var(--charcoal);}
+.ptxt{font-size:.76rem;color:var(--text-light);line-height:1.75;font-weight:300;}
+
+/* ─── BONUS ─── */
+.bonus-sec{background:var(--cream);}
+.bonus-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:stretch;}
+.bonus-card{background:var(--white);padding:3rem;border:1px solid rgba(200,169,110,.15);position:relative;overflow:hidden;transition:box-shadow .4s;}
+.bonus-card:hover{box-shadow:0 20px 50px rgba(0,0,0,.07);}
+.bonus-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light));}
+.bonus-icon{font-size:3.5rem;margin-bottom:1.4rem;display:block;}
+.bonus-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;margin-bottom:.7rem;}
+.bonus-desc{font-size:.8rem;color:var(--text-mid);line-height:1.85;font-weight:300;}
+.bonus-highlight{display:inline-block;margin-top:1.2rem;background:var(--sage-pale);border-left:3px solid var(--sage);padding:.6rem 1rem;font-size:.75rem;color:var(--sage);font-weight:400;}
+
+/* ─── TESTIMONIALS ─── */
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;}
+.tc{background:var(--white);padding:2.5rem;position:relative;overflow:hidden;transition:transform .5s,box-shadow .5s;}
+.tc:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,.08);}
+.tc::before{content:'"';font-family:'Cormorant Garamond',serif;font-size:8rem;color:rgba(200,169,110,.12);position:absolute;top:-2rem;left:1rem;line-height:1;pointer-events:none;}
+.tc-stars{color:var(--gold);margin-bottom:.8rem;font-size:.9rem;}
+.tc-txt{font-family:'Cormorant Garamond',serif;font-size:1rem;font-style:italic;color:var(--text-mid);line-height:1.7;margin-bottom:1.4rem;}
+.tc-au{display:flex;align-items:center;gap:.8rem;}
+.tc-av{width:42px;height:42px;border-radius:50%;background:var(--blush);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+.tc-name{font-size:.8rem;color:var(--charcoal);font-weight:400;}
+.tc-loc{font-size:.7rem;color:var(--text-light);}
+
+/* ─── NEWSLETTER ─── */
+.nl-sec{background:var(--charcoal);padding:90px 7rem;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;position:relative;overflow:hidden;}
+.nl-sec::before{content:'';position:absolute;top:50%;left:0;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(200,169,110,.12) 0%,transparent 65%);transform:translateY(-50%);}
+.nl-tag{font-size:.62rem;letter-spacing:.35em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:1rem;}
+.nl-h{font-family:'Cormorant Garamond',serif;font-size:2.5rem;font-weight:300;color:var(--white);line-height:1.2;margin-bottom:1rem;}
+.nl-p{font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.85;font-weight:300;}
+.nl-r{position:relative;z-index:1;}
+.nl-perks{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.8rem;}
+.nl-perk{display:flex;align-items:flex-start;gap:.6rem;}
+.nl-picon{color:var(--gold);font-size:.9rem;margin-top:.1rem;flex-shrink:0;}
+.nl-ptxt{font-size:.75rem;color:rgba(255,255,255,.6);line-height:1.55;}
+.nl-form{display:flex;gap:.8rem;}
+.nl-inp{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);padding:.9rem 1.2rem;color:var(--white);font-family:'Jost',sans-serif;font-size:.82rem;outline:none;transition:border .3s;}
+.nl-inp::placeholder{color:rgba(255,255,255,.3);}
+.nl-inp:focus{border-color:var(--gold);}
+
+/* ─── FOOTER ─── */
+.ft{background:var(--charcoal);padding:70px 7rem 40px;display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:4rem;}
+.ft-brand{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;letter-spacing:.18em;color:var(--white);margin-bottom:1rem;}
+.ft-brand span{color:var(--gold);font-style:italic;}
+.ft-about{font-size:.75rem;color:rgba(255,255,255,.4);line-height:1.85;max-width:260px;font-weight:300;}
+.ft-h{font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;}
+.ft-links{list-style:none;display:flex;flex-direction:column;gap:.55rem;}
+.ft-links a{font-size:.75rem;color:rgba(255,255,255,.45);cursor:pointer;transition:color .3s;text-decoration:none;}
+.ft-links a:hover{color:var(--white);}
+.ft-social{display:flex;gap:.8rem;margin-top:1.4rem;}
+.ft-si{width:34px;height:34px;border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;font-size:.9rem;color:rgba(255,255,255,.4);}
+.ft-si:hover{border-color:var(--gold);color:var(--gold);}
+.ft-bottom{background:var(--charcoal);padding:0 7rem 28px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.07);padding-top:24px;}
+.ft-copy{font-size:.65rem;color:rgba(255,255,255,.25);letter-spacing:.08em;}
+.ft-blinks{display:flex;gap:1.5rem;}
+.ft-blinks a{font-size:.65rem;color:rgba(255,255,255,.3);cursor:pointer;transition:color .3s;text-decoration:none;}
+.ft-blinks a:hover{color:rgba(255,255,255,.7);}
+
+/* ─── OVERLAYS / MODALS ─── */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);z-index:5000;opacity:0;visibility:hidden;transition:all .35s;display:flex;align-items:center;justify-content:center;}
+.ov.on{opacity:1;visibility:visible;}
+.gm{background:var(--white);width:90%;max-width:560px;max-height:90vh;overflow-y:auto;position:relative;transform:translateY(20px) scale(.97);transition:transform .35s cubic-bezier(.22,1,.36,1);}
+.ov.on .gm{transform:none;}
+.gm-h{padding:2rem 2rem 1.5rem;position:relative;}
+.gm-bg-blush{background:linear-gradient(135deg,var(--blush),var(--blush-deep));}
+.gm-bg-sage{background:linear-gradient(135deg,var(--sage-pale),rgba(138,158,126,.25));}
+.gm-bg-dark{background:var(--charcoal);}
+.gm-etag{font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:.4rem;}
+.gm-etitle{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--charcoal);}
+.gm-bg-dark .gm-etitle{color:var(--white);}
+.mclose{position:absolute;top:1.2rem;right:1.2rem;background:rgba(255,255,255,.7);border:none;cursor:pointer;width:30px;height:30px;border-radius:50%;font-size:.85rem;display:flex;align-items:center;justify-content:center;color:var(--text-mid);transition:all .3s;backdrop-filter:blur(4px);box-shadow:0 2px 10px rgba(0,0,0,.08);}
+.mclose:hover{background:var(--white);color:var(--charcoal);}
+.mclose-dark{background:rgba(255,255,255,.15);color:white;}
+.mclose-dark:hover{background:rgba(255,255,255,.3);color:white;}
+.gm-body{padding:1.8rem 2rem 2.2rem;}
+
+/* ─── PRODUCT MODAL ─── */
+.pm-em{font-size:7rem;text-align:center;margin-bottom:.5rem;animation:float 6s ease-in-out infinite;}
+.pm-ing{margin:1.2rem 0;}
+.pm-ing-title{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--text-light);margin-bottom:.5rem;}
+.pm-ing-list{display:flex;flex-wrap:wrap;gap:.4rem;}
+.pm-ing-tag{background:var(--ivory);font-size:.7rem;color:var(--text-mid);padding:.2rem .65rem;border:1px solid rgba(200,169,110,.2);}
+.pm-sizes{margin:1.4rem 0;}
+.pm-sz-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:.7rem;}
+.pm-sz{border:1.5px solid rgba(200,169,110,.25);padding:.9rem .6rem;text-align:center;cursor:pointer;transition:all .3s;position:relative;}
+.pm-sz:hover,.pm-sz.on{border-color:var(--gold);background:rgba(200,169,110,.06);}
+.pm-sz.on::after{content:'✓';position:absolute;top:4px;right:6px;font-size:.6rem;color:var(--gold);}
+.pm-sz-name{font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-light);margin-bottom:.3rem;}
+.pm-sz-price{font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:var(--charcoal);}
+.pm-sz-mod{font-size:.6rem;color:var(--text-light);}
+.pm-qty{display:flex;align-items:center;gap:1rem;margin:1.4rem 0;}
+.pm-q-btn{width:30px;height:30px;border:1px solid rgba(200,169,110,.35);background:none;cursor:pointer;font-size:1.1rem;color:var(--text-mid);transition:all .3s;display:flex;align-items:center;justify-content:center;}
+.pm-q-btn:hover{border-color:var(--gold);color:var(--charcoal);}
+.pm-q-val{font-family:'Cormorant Garamond',serif;font-size:1.3rem;min-width:28px;text-align:center;}
+.pm-total{font-size:.72rem;color:var(--text-light);margin-left:auto;}
+.pm-total strong{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--charcoal);font-weight:300;}
+.pm-free-note{background:rgba(138,158,126,.12);border-left:3px solid var(--sage);padding:.6rem .9rem;font-size:.74rem;color:var(--sage);margin:1rem 0;display:none;}
+.pm-free-note.show{display:block;}
+
+/* ─── CART ─── */
+.cart-panel{position:fixed;top:0;right:-480px;width:460px;height:100vh;background:var(--white);z-index:6000;box-shadow:-20px 0 60px rgba(0,0,0,.12);transition:right .5s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;}
+.cart-panel.on{right:0;}
+.cart-head{padding:1.8rem 2rem;border-bottom:1px solid rgba(200,169,110,.15);display:flex;align-items:center;justify-content:space-between;}
+.cart-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;}
+.cclose{background:none;border:none;cursor:pointer;color:var(--text-mid);transition:color .3s;}
+.cclose:hover{color:var(--charcoal);}
+.cart-body{flex:1;overflow-y:auto;padding:1.4rem 2rem;}
+.ci{display:flex;gap:1rem;padding:1rem 0;border-bottom:1px solid rgba(200,169,110,.1);align-items:center;}
+.ci-em{font-size:2.8rem;width:54px;height:54px;background:var(--ivory);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ci-info{flex:1;}
+.ci-name{font-family:'Cormorant Garamond',serif;font-size:.95rem;margin-bottom:.15rem;}
+.ci-sz{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-light);margin-bottom:.3rem;}
+.ci-free{font-size:.65rem;color:var(--sage);font-weight:400;}
+.ci-price{font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--charcoal);text-align:right;}
+.ci-price.free{color:var(--sage);}
+.ci-rm{background:none;border:none;cursor:pointer;color:var(--text-light);font-size:.7rem;padding:.1rem;transition:color .3s;}
+.ci-rm:hover{color:var(--alert);}
+.cart-empty{text-align:center;padding:4rem 2rem;color:var(--text-light);}
+.cart-empty-icon{font-size:4rem;opacity:.3;margin-bottom:1rem;}
+.cart-foot{padding:1.6rem 2rem;border-top:1px solid rgba(200,169,110,.15);}
+.cart-row{display:flex;justify-content:space-between;font-size:.8rem;color:var(--text-mid);margin-bottom:.5rem;}
+.cart-total{display:flex;justify-content:space-between;font-family:'Cormorant Garamond',serif;font-size:1.3rem;padding-top:.7rem;margin-top:.3rem;border-top:1px solid rgba(200,169,110,.18);margin-bottom:1.2rem;}
+.cart-solde-info{background:var(--sage-pale);padding:.8rem;font-size:.74rem;color:var(--sage);margin-bottom:1rem;display:none;}
+.cart-solde-info.show{display:block;}
+.cart-solde-warn{background:var(--alert-pale);padding:.8rem;font-size:.74rem;color:var(--alert);margin-bottom:1rem;display:none;}
+.cart-solde-warn.show{display:block;}
+.loyalty-bar{background:var(--ivory);padding:.9rem;margin-bottom:1rem;}
+.loyalty-bar-title{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-light);margin-bottom:.5rem;}
+.loyalty-progress{height:4px;background:rgba(200,169,110,.2);border-radius:2px;overflow:hidden;margin-bottom:.4rem;}
+.loyalty-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .6s ease;}
+.loyalty-txt{font-size:.68rem;color:var(--text-mid);}
+
+/* ─── FORMS ─── */
+.fr{margin-bottom:1rem;}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+.fl-l{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-light);display:block;margin-bottom:.35rem;}
+.fi{width:100%;border:1px solid rgba(200,169,110,.3);background:var(--ivory);padding:.8rem 1rem;font-family:'Jost',sans-serif;font-size:.83rem;color:var(--charcoal);outline:none;transition:border .3s;}
+.fi:focus{border-color:var(--gold);}
+.fi.error{border-color:var(--alert);background:var(--alert-pale);}
+.fdiv{text-align:center;position:relative;margin:1rem 0;}
+.fdiv::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(200,169,110,.2);}
+.fdiv span{position:relative;background:var(--white);padding:0 .8rem;font-size:.72rem;color:var(--text-light);}
+.flink{color:var(--gold);cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
+.fchk{display:flex;align-items:flex-start;gap:.6rem;margin-bottom:1rem;}
+.fchk input{margin-top:2px;flex-shrink:0;accent-color:var(--gold);}
+.fchk label{font-size:.75rem;color:var(--text-mid);line-height:1.6;}
+
+/* ─── TABS ─── */
+.tabs-r{display:flex;gap:0;margin-bottom:1.6rem;border-bottom:1px solid rgba(200,169,110,.2);}
+.tab-b{font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;padding:.65rem 1.1rem;border:none;background:none;cursor:pointer;color:var(--text-light);position:relative;font-family:'Jost',sans-serif;transition:color .3s;}
+.tab-b.on,.tab-b:hover{color:var(--charcoal);}
+.tab-b.on::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--gold);}
+.tpanel{display:none;}
+.tpanel.on{display:block;}
+
+/* ─── DASHBOARD ─── */
+.solde-box{background:var(--sage-pale);padding:1.4rem;margin-bottom:1.4rem;text-align:center;}
+.solde-amount{font-family:'Cormorant Garamond',serif;font-size:2.5rem;color:var(--charcoal);line-height:1;}
+.solde-label{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-light);margin-top:.3rem;}
+.recharge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin:.6rem 0;}
+.rch-btn{border:1.5px solid rgba(200,169,110,.3);background:none;padding:.7rem .4rem;font-family:'Cormorant Garamond',serif;font-size:1rem;cursor:pointer;transition:all .3s;color:var(--charcoal);}
+.rch-btn:hover{border-color:var(--gold);background:rgba(200,169,110,.07);}
+.oi{display:flex;align-items:center;gap:1rem;padding:.8rem 0;border-bottom:1px solid rgba(200,169,110,.1);}
+.os{font-size:.65rem;letter-spacing:.1em;padding:.25rem .6rem;background:var(--sage-pale);color:var(--sage);}
+.os.ret{background:var(--alert-pale);color:var(--alert);}
+.os.route{background:rgba(200,169,110,.15);color:var(--gold);}
+.fb2{height:5px;background:rgba(200,169,110,.18);border-radius:3px;overflow:hidden;margin:.5rem 0;}
+.fb2-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-light));border-radius:3px;transition:width .6s ease;}
+
+/* ─── CHECKOUT ─── */
+.com{background:var(--white);width:90%;max-width:700px;max-height:92vh;overflow-y:auto;transform:translateY(20px) scale(.97);transition:transform .35s cubic-bezier(.22,1,.36,1);}
+.ov.on .com{transform:none;}
+.co-body{padding:2rem;}
+.co-row{display:flex;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid rgba(200,169,110,.08);font-size:.8rem;}
+.co-row:last-child{border:none;}
+.co-free{color:var(--sage);}
+.co-total-row{display:flex;justify-content:space-between;padding-top:1rem;font-family:'Cormorant Garamond',serif;font-size:1.3rem;}
+.co-solde-check{padding:1rem;border:1px solid rgba(200,169,110,.25);background:var(--ivory);font-size:.8rem;margin:1rem 0;}
+.co-solde-ok{border-color:var(--sage);background:rgba(138,158,126,.05);color:var(--sage);}
+.co-solde-fail{border-color:var(--alert);background:var(--alert-pale);color:var(--alert);}
+.delivery-timer{text-align:center;padding:2rem;background:var(--ivory);margin:1.5rem 0;}
+.delivery-timer .dt-clock{font-family:'Cormorant Garamond',serif;font-size:3rem;color:var(--charcoal);line-height:1;}
+.delivery-timer .dt-label{font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;color:var(--text-light);margin-top:.4rem;}
+.delivery-guarantee{font-size:.75rem;color:var(--sage);margin-top:.8rem;}
+
+/* ─── LIVREUR ─── */
+.lv-order-card{border:1px solid rgba(200,169,110,.2);padding:1.2rem;margin-bottom:1rem;background:var(--ivory);transition:border-color .3s;}
+.lv-order-card.en-route{border-color:var(--gold);background:rgba(200,169,110,.04);}
+.lv-order-card.warning{border-color:var(--alert);background:var(--alert-pale);}
+.lv-order-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.8rem;}
+.lv-order-id{font-family:'Cormorant Garamond',serif;font-size:1.05rem;}
+.lv-order-client{font-size:.7rem;color:var(--text-light);margin-top:.1rem;}
+.lv-timer{font-family:'Cormorant Garamond',serif;font-size:2.4rem;line-height:1;color:var(--charcoal);}
+.lv-timer.warning{color:var(--alert);}
+.lv-timer-label{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-light);margin-top:.2rem;}
+.lv-timer-bar{height:6px;background:rgba(200,169,110,.15);border-radius:3px;overflow:hidden;margin:.6rem 0;}
+.lv-timer-fill{height:100%;border-radius:3px;transition:width 1s linear;}
+.veh-selector{display:flex;gap:.6rem;margin:.8rem 0;}
+.veh-btn{flex:1;border:1.5px solid rgba(200,169,110,.25);background:none;padding:.6rem;font-size:.75rem;cursor:pointer;transition:all .3s;font-family:'Jost',sans-serif;color:var(--text-mid);}
+.veh-btn.on{border-color:var(--gold);background:rgba(200,169,110,.08);color:var(--charcoal);}
+
+/* ─── STATS ─── */
+.stat-kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem;margin-bottom:1.4rem;}
+.stat-kpi-card{padding:1.2rem;text-align:center;}
+.stat-kpi-val{font-family:'Cormorant Garamond',serif;font-size:2rem;line-height:1;}
+.stat-kpi-label{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;margin-top:.3rem;}
+.stat-livreur-row{display:flex;align-items:center;gap:.8rem;padding:.7rem 0;border-bottom:1px solid rgba(200,169,110,.1);}
+.stat-rank{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:rgba(200,169,110,.25);width:20px;flex-shrink:0;}
+.stat-retard-bar{height:4px;background:rgba(224,90,90,.15);border-radius:2px;overflow:hidden;margin-top:.3rem;width:80px;}
+.stat-retard-fill{height:100%;background:var(--alert);border-radius:2px;}
+
+/* ─── SEARCH ─── */
+.srch{position:fixed;inset:0;background:rgba(250,247,243,.97);backdrop-filter:blur(20px);z-index:7000;opacity:0;visibility:hidden;transition:all .35s;display:flex;align-items:flex-start;justify-content:center;padding-top:15vh;}
+.srch.on{opacity:1;visibility:visible;}
+.srch-inner{width:90%;max-width:600px;}
+.srch-bar{display:flex;align-items:center;gap:1rem;border-bottom:2px solid var(--charcoal);padding-bottom:1rem;margin-bottom:2rem;}
+.srch-inp{flex:1;background:none;border:none;outline:none;font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:var(--charcoal);}
+.srch-inp::placeholder{color:var(--text-light);}
+.srch-stags{display:flex;flex-wrap:wrap;gap:.5rem;}
+.srch-stag{background:var(--ivory);border:1px solid rgba(200,169,110,.25);padding:.4rem .9rem;font-size:.7rem;letter-spacing:.12em;cursor:pointer;color:var(--text-mid);transition:all .3s;font-family:'Jost',sans-serif;}
+.srch-stag:hover{background:var(--blush);border-color:var(--blush-deep);}
+
+/* ─── REVEAL ANIMATIONS ─── */
+.fu{opacity:0;transform:translateY(28px);transition:opacity .75s ease,transform .75s ease;}
+.fu.vis{opacity:1;transform:none;}
+.fd{transition-delay:var(--d,0s);}
+
+/* ─── PAYMENT METHOD BUTTONS ─── */
+.pay-method-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.5rem;}
+.pay-btn{border:1.5px solid rgba(200,169,110,.25);background:none;padding:.7rem .8rem;font-size:.78rem;cursor:pointer;transition:all .3s;font-family:'Jost',sans-serif;color:var(--text-mid);text-align:left;display:flex;align-items:center;gap:.5rem;}
+.pay-btn:hover{border-color:var(--gold);}
+.pay-btn.on{border-color:var(--gold);background:rgba(200,169,110,.08);color:var(--charcoal);}
+
+/* ─── ADDRESS ERROR ─── */
+.addr-required{background:var(--alert-pale);border-left:3px solid var(--alert);padding:.6rem .9rem;font-size:.74rem;color:var(--alert);display:none;margin-bottom:.7rem;}
+.addr-required.show{display:block;}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:1200px){.sec{padding:90px 4rem;}.cta-banner{margin:0 4rem 90px;}.nl-sec{padding:70px 4rem;}.ft{grid-template-columns:1.4fr 1fr 1fr;}.ft>div:last-child{display:none;}}
+@media(max-width:960px){header{padding:0 1.5rem;}nav{display:none;}.hero{grid-template-columns:1fr;}.hero-r{min-height:55vh;}.hero-l{padding:110px 2rem 60px;}.cat-grid{grid-template-columns:repeat(3,1fr);}.cta-banner{margin:0 1.5rem 70px;padding:3rem 2rem;grid-template-columns:1fr;}.ban-vis{display:none;}.tgrid{grid-template-columns:1fr;}.sec{padding:60px 2rem;}.nl-sec{padding:60px 2rem;grid-template-columns:1fr;gap:2rem;}.pgrid{grid-template-columns:repeat(2,1fr);}.ft{grid-template-columns:1fr 1fr;gap:2rem;}.bonus-grid{grid-template-columns:1fr;}.notif-container{right:1rem;bottom:1rem;max-width:calc(100vw - 2rem);}.float-help{bottom:1rem;left:1rem;}}
+</style>
+</head>
+<body>
+  
+
+<div class="cur" id="cur"></div>
+<div class="cur-f" id="curf"></div>
+
+<div class="preloader" id="pre">
+  <div>
+    <div class="pre-logo">Mes <span>délices</span></div>
+    <div class="pre-line"></div>
+  </div>
+</div>
+
+<!-- ══════ NOTIFICATION STACK ══════ -->
+<div id="notifContainer" class="notif-container"></div>
+<button id="clearAllBtn" class="notif-clear-all" onclick="clearAllNotifs()">Tout effacer</button>
+
+<!-- ══════ FLOATING HELP ══════ -->
+<button class="float-help" onclick="openServiceClient()">
+  <span>💬</span><span>Service client</span>
+</button>
+
+<header id="hdr">
+  <div class="logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">Mes <span>Délices</span></div>
+  <nav>
+    <a onclick="goto('catalogue')">Catalogue</a>
+    <a onclick="goto('avantages')">Avantages</a>
+    <a onclick="goto('fonctionnement')">Comment ça marche</a>
+    <a onclick="goto('temoignages')">Avis clients</a>
+    <a onclick="openServiceClient()">Contact</a>
+  </nav>
+  <div class="h-actions">
+    <button class="ico-btn" onclick="openSrch()" title="Rechercher">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </button>
+    <div class="solde-badge" id="soldeBadge" onclick="openAcc()">
+      💳 <span id="soldeHdr">0 FCFA</span>
+    </div>
+    <div class="livreur-badge" id="livreurBadge" onclick="openLivreurDash()">
+      🛵 <span id="livreurHdr">Livreur</span>
+    </div>
+    <button class="ico-btn" id="accBtn" onclick="openAcc()" title="Mon compte">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
+    <button class="ico-btn" onclick="openCart()" title="Panier">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      <span class="cbadge" id="cbadge">0</span>
+    </button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-l">
+    <div class="hero-eyebrow"><span>Pâtisserie & Livraison</span></div>
+    <h1 class="hero-h1">Des gâteaux<br>livrés avec <em>passion</em><br><strong>& rapidité</strong></h1>
+    <p class="hero-p">Choisissez parmi notre catalogue de gâteaux artisanaux en 3 tailles. Service prépayé, livraison garantie en 30 minutes — sinon c'est offert.</p>
+    <div class="hero-btns">
+      <button class="btn-p" onclick="goto('catalogue')"><span>Voir le catalogue</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="15" height="15"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+      <button class="btn-ghost" onclick="openLogin(false)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>S'abonner maintenant</button>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-num">8</div><div class="hero-stat-lbl">gâteaux au catalogue</div></div>
+      <div><div class="hero-stat-num">30</div><div class="hero-stat-lbl">min garanties</div></div>
+      <div><div class="hero-stat-num">4.8</div><div class="hero-stat-lbl">note moyenne</div></div>
+    </div>
+  </div>
+  <div class="hero-r">
+    <div class="hero-deco-1">Catalogue 2026</div>
+    <div class="hero-cake-wrap">
+      <svg class="hero-cake-svg" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="cg1" cx="50%" cy="50%"><stop offset="0%" stop-color="#ffe8dc"/><stop offset="100%" stop-color="#f0c8b8"/></radialGradient>
+          <radialGradient id="cg2" cx="50%" cy="50%"><stop offset="0%" stop-color="#fff5ef"/><stop offset="100%" stop-color="#f8e0d0"/></radialGradient>
+          <filter id="cshadow"><feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="rgba(0,0,0,.15)"/></filter>
+        </defs>
+        <ellipse cx="160" cy="285" rx="110" ry="12" fill="rgba(0,0,0,.08)"/>
+        <rect x="60" y="225" width="200" height="52" rx="5" fill="url(#cg1)" filter="url(#cshadow)"/>
+        <rect x="60" y="225" width="200" height="10" rx="3" fill="rgba(255,255,255,.4)"/>
+        <rect x="72" y="168" width="176" height="62" rx="4" fill="url(#cg2)" filter="url(#cshadow)"/>
+        <rect x="72" y="168" width="176" height="10" rx="2" fill="rgba(255,255,255,.35)"/>
+        <rect x="84" y="118" width="152" height="55" rx="4" fill="#fffaf6" filter="url(#cshadow)"/>
+        <rect x="84" y="118" width="152" height="12" rx="2" fill="rgba(255,255,255,.5)"/>
+        <ellipse cx="160" cy="118" rx="76" ry="12" fill="#fff8f4"/>
+        <circle cx="132" cy="108" r="8" fill="#d4998a" opacity=".85"/>
+        <circle cx="160" cy="100" r="10" fill="#8a9e7e" opacity=".9"/>
+        <circle cx="188" cy="108" r="8" fill="#d4998a" opacity=".85"/>
+        <line x1="160" y1="118" x2="160" y2="76" stroke="#e8c5b8" stroke-width="1.5"/>
+        <ellipse cx="160" cy="74" rx="4" ry="8" fill="#c8a96e" opacity=".9"/>
+        <circle cx="160" cy="76" r="2" fill="#ffdd44" opacity=".9"/>
+      </svg>
+    </div>
+    <div class="hero-badge">✦ Livré en 30 min ou offert</div>
+  </div>
+  <div class="scroll-hint" style="bottom:2rem;left:50%;position:absolute;transform:translateX(-50%);">
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<div class="mq-wrap">
+  <div class="mq-track">
+    <span class="mq-item">🎂 Forêt Noire</span><span class="mq-dot">·</span>
+    <span class="mq-item">🍰 Fraisier</span><span class="mq-dot">·</span>
+    <span class="mq-item">🍫 Opéra</span><span class="mq-dot">·</span>
+    <span class="mq-item">🥐 Mille-Feuille</span><span class="mq-dot">·</span>
+    <span class="mq-item">🌸 Tarte Tropézienne</span><span class="mq-dot">·</span>
+    <span class="mq-item">🍹 Baba au Rhum</span><span class="mq-dot">·</span>
+    <span class="mq-item">🍓 Charlotte aux Fraises</span><span class="mq-dot">·</span>
+    <span class="mq-item">🟤 Gâteau Basque</span><span class="mq-dot">·</span>
+    <span class="mq-item">⏱ Garantie 30 minutes</span><span class="mq-dot">·</span>
+    <span class="mq-item">🎁 1 gâteau offert tous les 10</span><span class="mq-dot">·</span>
+    <span class="mq-item">🎂 Forêt Noire</span><span class="mq-dot">·</span>
+    <span class="mq-item">🍰 Fraisier</span><span class="mq-dot">·</span>
+    <span class="mq-item">🍫 Opéra</span><span class="mq-dot">·</span>
+    <span class="mq-item">🥐 Mille-Feuille</span><span class="mq-dot">·</span>
+    <span class="mq-item">🌸 Tarte Tropézienne</span><span class="mq-dot">·</span>
+    <span class="mq-item">🍹 Baba au Rhum</span><span class="mq-dot">·</span>
+    <span class="mq-item">🍓 Charlotte aux Fraises</span><span class="mq-dot">·</span>
+    <span class="mq-item">🟤 Gâteau Basque</span><span class="mq-dot">·</span>
+    <span class="mq-item">⏱ Garantie 30 minutes</span><span class="mq-dot">·</span>
+    <span class="mq-item">🎁 1 gâteau offert tous les 10</span><span class="mq-dot">·</span>
+  </div>
+</div>
+
+<section class="sec cat-sec" id="categories">
+  <div class="sh fu">
+    <span class="sh-tag">Nos familles de gâteaux</span>
+    <h2 class="sh-title">Un catalogue <em>varié</em><br>pour chaque occasion</h2>
+    <div class="sh-line"></div>
+  </div>
+  <div class="cat-grid">
+    <div class="cat-card fu" onclick="rProd('classique');goto('catalogue')"><div class="cat-bg cb1"></div><div class="cat-em">🍫</div><div class="cat-info"><span class="cat-name">Classiques</span><span class="cat-cnt">Forêt Noire, Opéra…</span></div></div>
+    <div class="cat-card fu" style="--d:.08s" onclick="rProd('fruité');goto('catalogue')"><div class="cat-bg cb2"></div><div class="cat-em">🍓</div><div class="cat-info"><span class="cat-name">Fruités</span><span class="cat-cnt">Fraisier, Charlotte…</span></div></div>
+    <div class="cat-card fu" style="--d:.16s" onclick="rProd('crème');goto('catalogue')"><div class="cat-bg cb3"></div><div class="cat-em">🍰</div><div class="cat-info"><span class="cat-name">Crèmes & mousses</span><span class="cat-cnt">Mille-Feuille, Tropézienne…</span></div></div>
+    <div class="cat-card fu" style="--d:.24s" onclick="rProd('alcoolisé');goto('catalogue')"><div class="cat-bg cb4"></div><div class="cat-em">🍹</div><div class="cat-info"><span class="cat-name">Alcoolisés</span><span class="cat-cnt">Baba au Rhum…</span></div></div>
+    <div class="cat-card fu" style="--d:.32s" onclick="rProd('tous');goto('catalogue')"><div class="cat-bg cb5"></div><div class="cat-em">✦</div><div class="cat-info"><span class="cat-name">Tout le catalogue</span><span class="cat-cnt">8 créations disponibles</span></div></div>
+  </div>
+</section>
+
+<section class="sec" id="catalogue" style="background:var(--cream)">
+  <div class="sh fu">
+    <span class="sh-tag">Catalogue Mes Délices</span>
+    <h2 class="sh-title">Choisissez votre <em>gâteau</em></h2>
+    <div class="sh-line"></div>
+    <p class="sh-sub">Chaque gâteau est disponible en 3 tailles : petite, moyenne et grande.</p>
+  </div>
+  <div class="fbar">
+    <button class="fb on" onclick="setF(this,'tous')">Tous</button>
+    <button class="fb" onclick="setF(this,'classique')">Classiques</button>
+    <button class="fb" onclick="setF(this,'fruité')">Fruités</button>
+    <button class="fb" onclick="setF(this,'crème')">Crèmes</button>
+    <button class="fb" onclick="setF(this,'alcoolisé')">Alcoolisés</button>
+  </div>
+  <div class="pgrid" id="pgrid"></div>
+</section>
+
+<div class="cta-banner fu">
+  <div>
+    <div class="ban-tag">Service prépayé</div>
+    <h2 class="ban-h">Abonnez-vous &<br>rechargez votre<br>compte</h2>
+    <p class="ban-p">Pour commander, créez votre compte et approvisionnez votre solde. Passez commande en quelques secondes, sans saisir vos informations bancaires à chaque fois.</p>
+    <button class="btn-o" onclick="openLogin(true)"><span>Créer mon compte</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+  </div>
+  <div class="ban-vis">💳</div>
+</div>
+
+<section class="sec proc-sec" id="fonctionnement">
+  <div class="sh fu">
+    <span class="sh-tag">Comment ça marche</span>
+    <h2 class="sh-title">Simple, rapide, <em>savoureux</em></h2>
+    <div class="sh-line"></div>
+  </div>
+  <div class="proc-grid">
+    <div class="proc-step fu"><div class="pnum">01</div><div class="picon">📋</div><div class="pname">S'abonner</div><p class="ptxt">Créez votre compte client et abonnez-vous pour accéder au catalogue complet.</p></div>
+    <div class="proc-step fu" style="--d:.1s"><div class="pnum">02</div><div class="picon">💳</div><div class="pname">Recharger</div><p class="ptxt">Approvisionnez via Orange Money, Wave, MTN ou Moov. Votre solde est vérifié avant toute commande.</p></div>
+    <div class="proc-step fu" style="--d:.2s"><div class="pnum">03</div><div class="picon">🎂</div><div class="pname">Commander</div><p class="ptxt">Choisissez votre gâteau, sélectionnez la taille, renseignez votre adresse et confirmez.</p></div>
+    <div class="proc-step fu" style="--d:.3s"><div class="pnum">04</div><div class="picon">🛵</div><div class="pname">Recevoir</div><p class="ptxt">Un livreur vous livre en moins de 30 minutes. Dépassé ce délai, votre gâteau est gratuit.</p></div>
+  </div>
+</section>
+
+<section class="sec bonus-sec" id="avantages">
+  <div class="sh fu"><span class="sh-tag">Nos avantages clients</span><h2 class="sh-title">Des <em>récompenses</em><br>qui font plaisir</h2><div class="sh-line"></div></div>
+  <div class="bonus-grid">
+    <div class="bonus-card fu"><span class="bonus-icon">🎁</span><h3 class="bonus-title">Programme de fidélité</h3><p class="bonus-desc">Pour chaque tranche de 10 gâteaux achetés, le 10ème vous est offert automatiquement — aucune démarche de votre part.</p><div class="bonus-highlight">Votre compteur est visible dans Mon Espace → Fidélité</div></div>
+    <div class="bonus-card fu" style="--d:.12s"><span class="bonus-icon">⏱</span><h3 class="bonus-title">Garantie 30 minutes</h3><p class="bonus-desc">Si votre livreur dépasse ce délai, votre commande vous est offerte et votre solde restitué sans démarche de votre part.</p><div class="bonus-highlight">Chronométré à partir de la confirmation de commande</div></div>
+  </div>
+</section>
+
+<section class="sec" id="temoignages" style="background:var(--ivory)">
+  <div class="sh fu"><span class="sh-tag">Avis clients</span><h2 class="sh-title">Ils nous font <em>confiance</em></h2><div class="sh-line"></div></div>
+  <div class="tgrid">
+    <div class="tc fu"><div class="tc-stars">★★★★★</div><p class="tc-txt">La Forêt Noire en taille grande pour mon anniversaire — livrée en 24 minutes ! Parfaite.</p><div class="tc-au"><div class="tc-av">👩</div><div><div class="tc-name">DJEDJE P.</div><div class="tc-loc">Abidjan · 6 commandes</div></div></div></div>
+    <div class="tc fu" style="--d:.1s"><div class="tc-stars">★★★★★</div><p class="tc-txt">Le système prépayé est tellement pratique. Mon 10ème gâteau offert était un délice !</p><div class="tc-au"><div class="tc-av">👨</div><div><div class="tc-name">DEA S M.</div><div class="tc-loc">Abidjan · 23 commandes</div></div></div></div>
+    <div class="tc fu" style="--d:.2s"><div class="tc-stars">★★★★☆</div><p class="tc-txt">Une fois le livreur a mis 35 minutes. Conformément à leur promesse, le gâteau a été gratuit. Chapeau !</p><div class="tc-au"><div class="tc-av">👩</div><div><div class="tc-name">AGOUA J.</div><div class="tc-loc">Abidjan · 8 commandes</div></div></div></div>
+  </div>
+</section>
+
+<div class="nl-sec fu">
+  <div><span class="nl-tag">Restez informé</span><h2 class="nl-h">Nouveautés &<br>offres exclusives</h2><p class="nl-p">Recevez en avant-première nos nouvelles créations, promotions et invitations à nos ateliers.</p></div>
+  <div class="nl-r">
+    <div class="nl-perks">
+      <div class="nl-perk"><span class="nl-picon">✦</span><span class="nl-ptxt">Nouveaux gâteaux au catalogue</span></div>
+      <div class="nl-perk"><span class="nl-picon">✦</span><span class="nl-ptxt">Offres de recharge exclusives</span></div>
+      <div class="nl-perk"><span class="nl-picon">✦</span><span class="nl-ptxt">Invitations ateliers pâtisserie</span></div>
+      <div class="nl-perk"><span class="nl-picon">✦</span><span class="nl-ptxt">Alertes saveurs saisonnières</span></div>
+    </div>
+    <div class="nl-form">
+      <input class="nl-inp" type="email" id="nlInp" placeholder="Votre adresse e-mail">
+      <button class="btn-p" onclick="subNl()"><span>S'inscrire</span></button>
+    </div>
+  </div>
+</div>
+
+<footer class="ft">
+  <div>
+    <div class="ft-brand">Mes <span>Délices</span></div>
+    <p class="ft-about">Pâtisserie artisanale et service de livraison rapide. Des gâteaux confectionnés avec soin, livrés chez vous en moins de 30 minutes.</p>
+    <div class="ft-social"><div class="ft-si">f</div><div class="ft-si">in</div><div class="ft-si">ig</div></div>
+  </div>
+  <div>
+    <div class="ft-h">Catalogue</div>
+    <ul class="ft-links">
+      <li><a onclick="rProd('tous');goto('catalogue')">Tous les gâteaux</a></li>
+      <li><a onclick="rProd('classique');goto('catalogue')">Classiques</a></li>
+      <li><a onclick="rProd('fruité');goto('catalogue')">Fruités</a></li>
+      <li><a onclick="rProd('crème');goto('catalogue')">Crèmes & Mousses</a></li>
+      <li><a onclick="rProd('alcoolisé');goto('catalogue')">Alcoolisés</a></li>
+    </ul>
+  </div>
+  <div>
+    <div class="ft-h">Service</div>
+    <ul class="ft-links">
+      <li><a href="#" onclick="openLogin(true)">Créer un compte</a></li>
+      <li><a href="#" onclick="openLogin(false)">Se connecter</a></li>
+      <li><a href="#" onclick="goto('avantages')">Programme fidélité</a></li>
+      <li><a href="#" onclick="goto('fonctionnement')">Comment ça marche</a></li>
+      <li><a href="#" onclick="openServiceClient()">Service Client</a></li>
+    </ul>
+  </div>
+  <div>
+    <div class="ft-h">Professionnel</div>
+    <ul class="ft-links">
+      <li><a onclick="openLivreurLogin()" style="color:var(--gold)!important">🛵 Espace Livreur</a></li>
+      <li><a onclick="openStats()" style="color:rgba(200,169,110,.7)!important">📊 Statistiques</a></li>
+      <li><a onclick="openFaq()">FAQ</a></li>
+      <li><a onclick="openMentions()">Mentions légales</a></li>
+      <li><a>Livraison 7j/7</a></li>
+    </ul>
+  </div>
+</footer>
+<div class="ft-bottom">
+  <span class="ft-copy">© 2026 Mes Délices — Tous droits réservés</span>
+  <div class="ft-blinks">
+    <a onclick="openMentions()">CGV</a>
+    <a onclick="openCookies()">Cookies</a>
+    <a onclick="openMentions()">Confidentialité</a>
+    <a onclick="openLivreurLogin()" style="color:var(--gold)!important">Espace Livreur</a>
+    <a onclick="openStats()">Stats</a>
+  </div>
+</div>
+
+<!-- ══════ CART PANEL ══════ -->
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-head">
+    <div class="cart-title">Mon panier</div>
+    <button class="cclose" onclick="closeCart()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="cart-body" id="cartBody"></div>
+  <div class="cart-foot" id="cartFoot"></div>
+</div>
+<div id="cartOv" style="position:fixed;inset:0;z-index:5999;display:none;" onclick="closeCart()"></div>
+
+<!-- ══════ MODAL OVERLAY ══════ -->
+<div class="ov" id="ov" onclick="if(event.target===this)closeM()">
+  <div id="ovContent"></div>
+</div>
+
+<!-- ══════ SEARCH ══════ -->
+<div class="srch" id="srch">
+  <div class="srch-inner">
+    <div class="srch-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="srch-inp" id="sinp" type="text" placeholder="Rechercher un gâteau…" oninput="doSearch(this.value)">
+      <button style="background:none;border:none;cursor:pointer;color:var(--text-mid)" onclick="closeSrch()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="sres">
+      <p style="font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--text-light);margin-bottom:1rem">Suggestions populaires</p>
+      <div class="srch-stags">
+        <button class="srch-stag" onclick="qs('Forêt')">Forêt Noire</button>
+        <button class="srch-stag" onclick="qs('Frais')">Fraisier</button>
+        <button class="srch-stag" onclick="qs('Opéra')">Opéra</button>
+        <button class="srch-stag" onclick="qs('Mille')">Mille-Feuille</button>
+        <button class="srch-stag" onclick="qs('Baba')">Baba au Rhum</button>
+        <button class="srch-stag" onclick="qs('Charlotte')">Charlotte</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// ══════════════════════════════════════════ DATA
+const PRODS=[
+  {id:1,name:'Forêt Noire',cat:'classique',e:'🎂',prix:10000,ingredients:['génoise chocolat','cerises griottes','chantilly','kirsch'],desc:'La grande classique : génoise au chocolat, cerises griottes et chantilly légère au kirsch.',badge:'bestseller',rating:4.9,reviews:187},
+  {id:2,name:'Fraisier',cat:'fruité',e:'🍰',prix:8500,ingredients:['génoise vanille','fraises gariguette','crème mousseline','beurre'],desc:'Génoise moelleuse, crème mousseline soyeuse et fraises gariguettes de saison.',badge:'new',rating:5,reviews:64},
+  {id:3,name:'Opéra',cat:'classique',e:'🍫',prix:9000,ingredients:['biscuit joconde','café fort','ganache chocolat','beurre','amandes'],desc:'Biscuit joconde aux amandes, ganache chocolat intense et sirop de café.',badge:'',rating:4.8,reviews:112},
+  {id:4,name:'Mille-Feuille',cat:'crème',e:'🥐',prix:7500,ingredients:['pâte feuilletée','crème pâtissière vanille','fondant blanc','chocolat'],desc:'Feuilletage croustillant, crème pâtissière à la vanille de Madagascar, glaçage fondant.',badge:'',rating:4.7,reviews:93},
+  {id:5,name:'Tarte Tropézienne',cat:'crème',e:'🌸',prix:7000,ingredients:['brioche moelleuse','crème diplomate','fleur d\'oranger','sucre perlé'],desc:'Brioche parfumée à la fleur d\'oranger, garnie de crème diplomate.',badge:'bestseller',rating:5,reviews:201},
+  {id:6,name:'Baba au Rhum',cat:'alcoolisé',e:'🍹',prix:6500,ingredients:['brioche levée','rhum ambré','sirop vanille','raisins secs','chantilly'],desc:'Brioche légère imbibée d\'un sirop au rhum ambré, accompagnée de chantilly maison.',badge:'',rating:4.6,reviews:78},
+  {id:7,name:'Charlotte aux Fraises',cat:'fruité',e:'🍓',prix:8000,ingredients:['biscuits à la cuillère','mousse fraise','fraises fraîches','coulis fraise'],desc:'Couronne de biscuits cuillère, mousse légère aux fraises et coulis généreux.',badge:'',rating:4.8,reviews:99},
+  {id:8,name:'Gâteau Basque',cat:'crème',e:'🟤',prix:6000,ingredients:['pâte sablée','crème pâtissière','cerises noires','amandes en poudre'],desc:'Pâte sablée dorée aux amandes, crème pâtissière fine et cerises noires du Pays Basque.',badge:'',rating:4.5,reviews:55},
+];
+const SIZES=[
+  {key:'petite',label:'Petite',factor:2/3,note:'-1/3 du prix'},
+  {key:'moyenne',label:'Moyenne',factor:1,note:'Prix de base'},
+  {key:'grande',label:'Grande',factor:4/3,note:'+1/3 du prix'},
+];
+const LIVREURS=[
+  {id:1,nom:'KONE S.',retards:2,livraisons:18},
+  {id:2,nom:'TAHIN J.',retards:0,livraisons:24},
+  {id:3,nom:'MAGASSOUBA O.',retards:1,livraisons:15},
+];
+
+// ══════════════════════════════════════════ STATE
+let cart=[],user=null,subs=[],mQty=1,mSz='moyenne';
+let livreur=null,pendingOrders=[],orderCounter=0;
+let lvTimerIntervals={};
+let selectedPayMethod=null,selectedWithdrawMethod=null;
+let chatAutoQs=[];
+const ORDER_FREE_EVERY=10;
+
+// ══════════════════════════════════════════ UTILS
+const $=id=>document.getElementById(id);
+const f2=n=>Math.round(n).toLocaleString('fr-FR')+' FCFA';
+const pxSize=(prix,size)=>Math.round(prix*SIZES.find(s=>s.key===size).factor);
+function goto(id){$(id)?.scrollIntoView({behavior:'smooth'});}
+function fmtTime(ms){const s=Math.floor(ms/1000),m=Math.floor(s/60),sec=s%60;return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;}
+function elapsedMin(startTime){return (Date.now()-startTime)/1000/60;}
+
+// ══════════════════════════════════════════ NOTIFICATION SYSTEM (persistent)
+let notifId=0;
+function toast(msg,ico='✓'){
+  const id=++notifId;
+  const container=$('notifContainer');
+  const el=document.createElement('div');
+  el.className='notif-item';
+  el.id=`notif_${id}`;
+  el.innerHTML=`<span class="notif-ico">${ico}</span><span class="notif-msg">${msg}</span><button class="notif-close" onclick="dismissNotif(${id})" title="Fermer">✕</button>`;
+  container.appendChild(el);
+  // Double rAF for CSS transition
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
+  // Auto-dismiss after 5 seconds
+  setTimeout(()=>dismissNotif(id),5000);
+  // Show "clear all" button if 3+ notifs
+  const all=container.querySelectorAll('.notif-item');
+  if(all.length>=3) $('clearAllBtn').style.display='block';
+}
+function dismissNotif(id){
+  const el=$(`notif_${id}`);
+  if(!el) return;
+  el.classList.remove('show');
+  setTimeout(()=>{el.remove();if($('notifContainer').querySelectorAll('.notif-item').length<3)$('clearAllBtn').style.display='none';},350);
+}
+function clearAllNotifs(){
+  const container=$('notifContainer');
+  container.querySelectorAll('.notif-item').forEach(el=>{el.classList.remove('show');setTimeout(()=>el.remove(),350);});
+  setTimeout(()=>$('clearAllBtn').style.display='none',400);
+}
+
+// ══════════════════════════════════════════ PRELOADER
+window.addEventListener('load',()=>setTimeout(()=>$('pre').classList.add('done'),1400));
+
+// ══════════════════════════════════════════ HEADER
+window.addEventListener('scroll',()=>$('hdr').classList.toggle('bg',scrollY>50));
+
+// ══════════════════════════════════════════ CURSOR
+const $c=$('cur'),$cf=$('curf');
+let cx=window.innerWidth/2,cy=window.innerHeight/2,fx=cx,fy=cy;
+document.addEventListener('mousemove',e=>{cx=e.clientX;cy=e.clientY;$c.style.cssText=`left:${cx}px;top:${cy}px`;});
+(function af(){fx+=(cx-fx)*.1;fy+=(cy-fy)*.1;$cf.style.cssText=`left:${fx}px;top:${fy}px`;requestAnimationFrame(af);})();
+document.querySelectorAll('a,button,.cat-card,.pc,.tc').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('hovering'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('hovering'));
+});
+
+// ══════════════════════════════════════════ PRODUCTS
+function rProd(filter){
+  const g=$('pgrid');
+  const list=filter==='tous'?PRODS:PRODS.filter(p=>p.cat===filter);
+  g.innerHTML=list.map(p=>{
+    const pPet=pxSize(p.prix,'petite');
+    return `<div class="pc fu" onclick="openPM(${p.id})">
+      <div class="pc-img">
+        <div class="pc-em">${p.e}</div>
+        ${p.badge?`<div class="pc-bdg ${p.badge==='new'?'bdg-sage':'bdg-gold'}">${p.badge==='bestseller'?'Coup ❤':'Nouveau'}</div>`:''}
+      </div>
+      <div class="pc-body">
+        <div class="pc-name">${p.name}</div>
+        <div class="pc-desc">${p.ingredients.join(', ')}</div>
+        <div class="pc-foot">
+          <div>
+            <div class="pc-price">${f2(pPet)}<small>à partir de (petite)</small></div>
+            <div style="font-size:.63rem;color:var(--text-light)">Moy. ${f2(p.prix)} · Gr. ${f2(pxSize(p.prix,'grande'))}</div>
+            <div class="pc-stars">${'★'.repeat(Math.floor(p.rating))} <span style="font-size:.65rem;color:var(--text-light)">(${p.reviews})</span></div>
+          </div>
+          <button class="badd" onclick="event.stopPropagation();openPM(${p.id})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  obsAll();
+}
+function setF(btn,cat){document.querySelectorAll('.fb').forEach(b=>b.classList.remove('on'));btn.classList.add('on');rProd(cat);}
+
+// ══════════════════════════════════════════ PRODUCT MODAL
+function openPM(id){
+  const p=PRODS.find(x=>x.id===id);
+  if(!p) return;
+  mSz='moyenne';mQty=1;
+  const szRows=SIZES.map(s=>`<div class="pm-sz ${s.key==='moyenne'?'on':''}" id="sz_${s.key}" onclick="selSz('${s.key}',${p.prix})"><div class="pm-sz-name">${s.label}</div><div class="pm-sz-price">${f2(pxSize(p.prix,s.key))}</div><div class="pm-sz-mod">${s.note}</div></div>`).join('');
+  const gacheCount=user?(user.gateaux_achetes%ORDER_FREE_EVERY):0;
+  const remaining=ORDER_FREE_EVERY-gacheCount;
+  const freeMsg=user&&remaining===1
+    ?`<div class="pm-free-note show">🎁 C'est votre 10ème gâteau — il sera <strong>offert gratuitement</strong> !</div>`
+    :user?`<div class="pm-free-note show" style="background:rgba(200,169,110,.07);border-color:var(--gold);color:var(--text-mid)">✦ Plus que <strong>${remaining}</strong> gâteau${remaining>1?'x':''} avant votre prochain gâteau gratuit</div>`:'';
+  openM(`<div class="gm" style="max-width:520px">
+    <div class="gm-h gm-bg-blush"><button class="mclose" onclick="closeM()">✕</button><span class="gm-etag">${p.cat}</span><div class="gm-etitle">${p.name}</div></div>
+    <div class="gm-body">
+      <div class="pm-em">${p.e}</div>
+      <p style="font-size:.82rem;color:var(--text-mid);line-height:1.75;text-align:center;margin-bottom:1rem">${p.desc}</p>
+      <div class="pm-ing"><div class="pm-ing-title">Ingrédients</div><div class="pm-ing-list">${p.ingredients.map(i=>`<span class="pm-ing-tag">${i}</span>`).join('')}</div></div>
+      <div class="pm-sizes"><div class="pm-ing-title">Choisissez la taille</div><div class="pm-sz-row">${szRows}</div></div>
+      ${freeMsg}
+      <div class="pm-qty">
+        <button class="pm-q-btn" onclick="chgQty(-1,${p.prix})">−</button>
+        <span class="pm-q-val" id="pmqv">1</span>
+        <button class="pm-q-btn" onclick="chgQty(1,${p.prix})">+</button>
+        <div class="pm-total">Total : <strong id="pmtot">${f2(p.prix)}</strong></div>
+      </div>
+      <button class="btn-p" style="width:100%;justify-content:center" onclick="addCart(${p.id},mQty,mSz);closeM()"><span>Ajouter au panier</span></button>
+    </div>
+  </div>`);
+}
+function selSz(sz,basePrix){mSz=sz;document.querySelectorAll('.pm-sz').forEach(el=>el.classList.remove('on'));$(`sz_${sz}`)?.classList.add('on');updPMTotal(basePrix);}
+function chgQty(d,basePrix){mQty=Math.max(1,mQty+d);$('pmqv').textContent=mQty;updPMTotal(basePrix);}
+function updPMTotal(basePrix){const pr=pxSize(basePrix,mSz);if($('pmtot'))$('pmtot').textContent=f2(pr*mQty);}
+
+// ══════════════════════════════════════════ CART
+function addCart(id,qty,sz){
+  if(!user){toast('Connectez-vous pour commander','⚠️');openLogin(false);return;}
+  const p=PRODS.find(x=>x.id===id);if(!p) return;
+  const size=sz||'moyenne';
+  const price=pxSize(p.prix,size);
+  const totalBought=(user.gateaux_achetes||0)+cart.reduce((s,c)=>s+c.qty,0)+qty;
+  const isFree=(totalBought%ORDER_FREE_EVERY)===0&&totalBought>0;
+  cart.push({id,name:p.name,e:p.e,size,price,qty,isFree});
+  updCart();toast(`${p.name} (${size}) ajouté au panier`,'🎂');
+}
+function rmCart(idx){cart.splice(idx,1);updCart();}
+function updCart(){
+  const total=cart.reduce((s,c)=>s+(c.isFree?0:c.price*c.qty),0);
+  const count=cart.reduce((s,c)=>s+c.qty,0);
+  $('cbadge').textContent=count;
+  const body=$('cartBody');
+  if(!cart.length){
+    body.innerHTML=`<div class="cart-empty"><div class="cart-empty-icon">🎂</div><p style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;margin-bottom:.4rem">Votre panier est vide</p><p style="font-size:.75rem">Découvrez notre catalogue</p></div>`;
+    $('cartFoot').innerHTML='';return;
+  }
+  body.innerHTML=cart.map((c,i)=>`<div class="ci"><div class="ci-em">${c.e}</div><div class="ci-info"><div class="ci-name">${c.name} ×${c.qty}</div><div class="ci-sz">${c.size}${c.isFree?' — <span class="ci-free">🎁 Offert (fidélité)</span>':''}</div></div><div><div class="ci-price ${c.isFree?'free':''}">${c.isFree?'Gratuit':f2(c.price*c.qty)}</div><button class="ci-rm" onclick="rmCart(${i})">✕ retirer</button></div></div>`).join('');
+  const bought=(user?.gateaux_achetes||0)+cart.reduce((s,c)=>s+c.qty,0);
+  const prog=(bought%ORDER_FREE_EVERY)/ORDER_FREE_EVERY*100;
+  const rem=ORDER_FREE_EVERY-(bought%ORDER_FREE_EVERY);
+  const solde=user?.solde||0;
+  const soldeOk=solde>=total;
+  $('cartFoot').innerHTML=`
+    <div class="loyalty-bar"><div class="loyalty-bar-title">Fidélité — gâteau offert tous les ${ORDER_FREE_EVERY}</div><div class="loyalty-progress"><div class="loyalty-fill" style="width:${prog}%"></div></div><div class="loyalty-txt">${bought%ORDER_FREE_EVERY}/${ORDER_FREE_EVERY} gâteaux — encore ${rem} avant votre prochain cadeau</div></div>
+    ${user?`<div class="cart-solde-info ${soldeOk?'show':''}">✦ Solde suffisant : ${f2(solde)} disponible</div><div class="cart-solde-warn ${!soldeOk?'show':''}">⚠ Solde insuffisant (${f2(solde)}). <span class="flink" onclick="closeCart();openRechargeFlow()">Recharger mon compte</span></div>`:''}
+    <div class="cart-row"><span>Sous-total</span><span>${f2(total)}</span></div>
+    <div class="cart-row"><span>Livraison</span><span style="color:var(--sage)">Incluse</span></div>
+    <div class="cart-total"><span>Total</span><span>${f2(total)}</span></div>
+    <button class="btn-p" style="width:100%;justify-content:center" onclick="closeCart();openCheckout()"><span>Commander →</span></button>`;
+}
+function openCart(){$('cartPanel').classList.add('on');$('cartOv').style.display='block';}
+function closeCart(){$('cartPanel').classList.remove('on');$('cartOv').style.display='none';}
+
+// ══════════════════════════════════════════ MODAL
+function openM(html){$('ovContent').innerHTML=html;$('ov').classList.add('on');}
+function closeM(){$('ov').classList.remove('on');}
+
+// ══════════════════════════════════════════ LOGIN / ACCOUNT
+function openAcc(){user?openDash():openLogin(false);}
+function openLogin(isReg){
+  openM(`<div class="gm"><div class="gm-h gm-bg-sage"><button class="mclose" onclick="closeM()">✕</button><span class="gm-etag">${isReg?'Inscription':'Connexion'}</span><div class="gm-etitle">${isReg?'Créer un compte':'Se connecter'}</div></div>
+    <div class="gm-body">
+      ${isReg?`
+        <div class="fr"><label class="fl-l">Nom d'utilisateur</label><input class="fi" id="rU" placeholder="Votre nom d'utilisateur"></div>
+        <div class="fr2"><div class="fr"><label class="fl-l">Prénom</label><input class="fi" id="rP" placeholder="N'GUESSAN JAROD"></div><div class="fr"><label class="fl-l">Nom</label><input class="fi" id="rN" placeholder="NIAMIen"></div></div>
+        <div class="fr"><label class="fl-l">E-mail</label><input class="fi" id="rE" type="email" placeholder="Tony@gmail.com"></div>
+        <div class="fr"><label class="fl-l">Téléphone</label><input class="fi" id="rT" placeholder="+225 07 00 00 00 00"></div>
+        <div class="fr"><label class="fl-l">Mot de passe</label><input class="fi" id="rPw" type="password" placeholder="6 caractères minimum"></div>
+        <div class="fr"><label class="fl-l">Confirmer le mot de passe</label><input class="fi" id="rPw2" type="password" placeholder="Répétez le mot de passe"></div>
+        <div class="fchk"><input type="checkbox" id="rCgu"><label for="rCgu">J'accepte les <span class="flink">CGU</span> et la politique de confidentialité</label></div>
+        <button class="btn-p" style="width:100%;justify-content:center" onclick="doReg()"><span>Créer mon compte</span></button>
+        <p style="text-align:center;margin-top:1rem;font-size:.78rem;color:var(--text-light)">Déjà client ? <span class="flink" onclick="openLogin(false)">Se connecter</span></p>
+      `:`
+        <p style="font-size:.8rem;color:var(--text-mid);margin-bottom:1.4rem;line-height:1.7">Connectez-vous pour accéder à votre solde, passer commande et suivre vos livraisons.</p>
+        <div class="fr"><label class="fl-l">Nom d'utilisateur</label><input class="fi" id="lU" placeholder="Votre nom d'utilisateur"></div>
+        <div class="fr"><label class="fl-l">E-mail</label><input class="fi" id="lE" type="email" placeholder="votre@email.com"></div>
+        <div class="fr"><label class="fl-l">Mot de passe</label><input class="fi" id="lPw" type="password" placeholder="••••••"></div>
+        <div style="text-align:right;margin-bottom:1rem"><span class="flink" style="font-size:.75rem" onclick="openForgot()">Mot de passe oublié ?</span></div>
+        <button class="btn-p" style="width:100%;justify-content:center" onclick="doLogin()"><span>Se connecter</span></button>
+        <p style="text-align:center;margin-top:1rem;font-size:.78rem;color:var(--text-light)">Pas de compte ? <span class="flink" onclick="openLogin(true)">Créer un compte</span></p>
+      `}
+    </div>
+  </div>`);
+}
+function doLogin(){
+  const u=$('lU')?.value,e=$('lE')?.value,pw=$('lPw')?.value;
+  if(!u){toast('Nom d\'utilisateur requis','⚠️');return;}
+  if(!e?.includes('@')){toast('Email invalide','⚠️');return;}
+  if(!pw||pw.length<3){toast('Mot de passe incorrect','⚠️');return;}
+  user={prenom:u,nom:'Demo',email:e,solde:0,gateaux_achetes:0,telephone:'+225 07 43 25 18'};
+  updAcc();closeM();toast(`Bienvenue, ${user.prenom} ! Votre solde : ${f2(user.solde)}`,'🎂');
+}
+function doReg(){
+  const u=$('rU')?.value,p=$('rP')?.value,n=$('rN')?.value,e=$('rE')?.value,pw=$('rPw')?.value,pw2=$('rPw2')?.value,cgu=$('rCgu')?.checked;
+  if(!u){toast('Nom d\'utilisateur requis','⚠️');return;}
+  if(!p||!n){toast('Prénom et nom requis','⚠️');return;}
+  if(!e?.includes('@')){toast('Email invalide','⚠️');return;}
+  if(!pw||pw.length<6){toast('Mot de passe : 6 caractères min.','⚠️');return;}
+  if(pw!==pw2){toast('Mots de passe différents','⚠️');return;}
+  if(!cgu){toast('Acceptez les CGU pour continuer','⚠️');return;}
+  user={prenom:u,nom:n,email:e,solde:0,gateaux_achetes:0,telephone:''};
+  updAcc();closeM();toast(`Bienvenue, ${u} ! Rechargez votre compte pour commander 🎂`,'🎉');
+}
+function updAcc(){
+  $('accBtn').innerHTML=user
+    ?`<svg viewBox="0 0 24 24" fill="var(--gold)" stroke="var(--gold)" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
+    :`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+  const sb=$('soldeBadge'),sh=$('soldeHdr');
+  if(user){sb.classList.add('show');sh.textContent=f2(user.solde);}
+  else sb.classList.remove('show');
+}
+
+// ══════════════════════════════════════════ DASHBOARD
+function openDash(){
+  const pct=Math.min(100,Math.round((user.gateaux_achetes%ORDER_FREE_EVERY)/ORDER_FREE_EVERY*100));
+  const rem=ORDER_FREE_EVERY-(user.gateaux_achetes%ORDER_FREE_EVERY);
+  const myOrders=pendingOrders.filter(o=>o.clientEmail===user.email);
+  openM(`<div class="gm" style="max-width:660px">
+    <div class="gm-h gm-bg-sage"><button class="mclose" onclick="closeM()">✕</button><span class="gm-etag">Mon Espace</span><div class="gm-etitle">Bonjour, ${user.prenom} ✦</div></div>
+    <div class="gm-body">
+      <div class="tabs-r">
+        <button class="tab-b on" onclick="sw('tPr')">Profil & Solde</button>
+        <button class="tab-b" onclick="sw('tOr')">Commandes (${myOrders.length})</button>
+        <button class="tab-b" onclick="sw('tFi')">Fidélité</button>
+      </div>
+
+      <!-- ─ TAB PROFIL ─ -->
+      <div id="tPr" class="tpanel on">
+        <div class="solde-box">
+          <div class="solde-amount">${f2(user.solde)}</div>
+          <div class="solde-label">Solde disponible</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.6rem">
+          <button class="btn-p" style="justify-content:center;padding:.85rem" onclick="closeM();setTimeout(openRechargeFlow,150)">
+            <span>💳 Recharger mon compte</span>
+          </button>
+          <button class="btn-o" style="justify-content:center;padding:.85rem;border-color:var(--blush-deep);color:var(--blush-deep)" onclick="closeM();setTimeout(openWithdrawFlow,150)">
+            <span>💸 Retirer des fonds</span>
+          </button>
+        </div>
+        <hr style="border:none;border-top:1px solid rgba(200,169,110,.15);margin:0 0 1.2rem">
+        <div class="fr2">
+          <div class="fr"><label class="fl-l">Prénom</label><input class="fi" id="upP" value="${user.prenom}"></div>
+          <div class="fr"><label class="fl-l">Nom</label><input class="fi" id="upN" value="${user.nom}"></div>
+        </div>
+        <div class="fr"><label class="fl-l">E-mail</label><input class="fi" id="upE" type="email" value="${user.email}"></div>
+        <div class="fr"><label class="fl-l">Téléphone</label><input class="fi" id="upT" value="${user.telephone||''}" placeholder="+225 07 00 00 00 00"></div>
+        <div style="display:flex;gap:1rem;align-items:center">
+          <button class="btn-p" onclick="savePr()"><span>Sauvegarder</span></button>
+          <button style="background:none;border:none;cursor:pointer;color:var(--blush-deep);font-size:.78rem;font-family:'Jost',sans-serif" onclick="logout()">Se déconnecter</button>
+        </div>
+      </div>
+
+      <!-- ─ TAB COMMANDES ─ -->
+      <div id="tOr" class="tpanel">
+        ${myOrders.length===0
+          ?`<div style="text-align:center;padding:2rem;color:var(--text-light)"><div style="font-size:2.5rem;opacity:.3">📦</div><p style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;margin-top:.5rem">Aucune commande enregistrée</p></div>`
+          :myOrders.map(o=>`<div class="oi">
+            <span style="font-size:1.8rem">${o.isLate?'⏱':o.status==='delivered'?'✓':o.status==='en_route'?'🛵':'⏳'}</span>
+            <div style="flex:1">
+              <div style="font-family:'Cormorant Garamond',serif;font-size:.92rem">Commande #${o.id}</div>
+              <div style="font-size:.68rem;color:var(--text-light)">${o.items.map(i=>`${i.name} (${i.size})`).join(', ')} · ${f2(o.isLate?0:o.total)}</div>
+              <div style="font-size:.68rem;color:var(--text-light)">📍 ${o.address}</div>
+              ${o.status==='delivered'?`<div style="font-size:.68rem;color:var(--sage)">Livré en ${Math.round(o.deliveryTime)} min${o.isLate?' — remboursé automatiquement':''}</div>`:''}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.4rem;align-items:flex-end">
+              <div class="os ${o.isLate?'ret':o.status==='delivered'?'':o.status==='en_route'?'route':''}">${o.isLate?'Retard→Gratuit':o.status==='delivered'?'Livré ✓':o.status==='en_route'?'En route 🛵':'En attente'}</div>
+              ${o.status==='delivered'?`<button class="btn-o" style="padding:.3rem .7rem;font-size:.6rem;white-space:nowrap" onclick="downloadInvoice(${o.id})"><span>📄 Facture</span></button>`:''}
+            </div>
+          </div>`).join('')}
+        <p style="font-size:.72rem;color:var(--text-light);margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(200,169,110,.15)">${user.gateaux_achetes} gâteaux commandés depuis l'inscription</p>
+      </div>
+
+      <!-- ─ TAB FIDÉLITÉ ─ -->
+      <div id="tFi" class="tpanel">
+        <div style="text-align:center;padding:1.5rem 0 2rem">
+          <div style="font-size:3.5rem;margin-bottom:.5rem">🎁</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:2.5rem;line-height:1">${user.gateaux_achetes}</div>
+          <div style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-light);margin:.3rem 0 .8rem">gâteaux achetés au total</div>
+        </div>
+        <div class="fb2"><div class="fb2-fill" style="width:${pct}%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--text-light);margin-bottom:1.5rem">
+          <span>${user.gateaux_achetes%ORDER_FREE_EVERY}/${ORDER_FREE_EVERY} gâteaux</span>
+          <span>Encore ${rem} avant un gâteau offert</span>
+        </div>
+        <div style="background:var(--ivory);padding:1.3rem">
+          <div style="font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-light);margin-bottom:.8rem">Avantages actifs</div>
+          <div style="font-size:.8rem;color:var(--text-mid);line-height:2.2">
+            ✦ 1 gâteau gratuit tous les ${ORDER_FREE_EVERY} gâteaux achetés<br>
+            ✦ Tout retard de livraison (>30 min) = gâteau offert<br>
+            ✦ Vérification automatique du solde avant commande
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`);
+}
+
+function sw(id){
+  document.querySelectorAll('.tpanel,.tab-b').forEach(e=>e.classList.remove('on'));
+  $(id)?.classList.add('on');
+  const idx=['tPr','tOr','tFi'].indexOf(id);
+  document.querySelectorAll('.tab-b')[idx]?.classList.add('on');
+}
+function savePr(){if(user){user.prenom=$('upP').value;user.nom=$('upN').value;user.email=$('upE').value;user.telephone=$('upT').value;}closeM();toast('Profil mis à jour ✓','✓');updAcc();}
+function logout(){user=null;updAcc();closeM();toast('À bientôt !','👋');updCart();}
+function openForgot(){openM(`<div class="gm"><div class="gm-h gm-bg-sage"><button class="mclose" onclick="closeM()">✕</button><span class="gm-etag">Récupération</span><div class="gm-etitle">Mot de passe oublié</div></div><div class="gm-body"><p style="font-size:.82rem;color:var(--text-mid);margin-bottom:1.4rem;line-height:1.75">Entrez votre email pour recevoir un lien de réinitialisation.</p><div class="fr"><label class="fl-l">E-mail</label><input class="fi" id="fgE" type="email" placeholder="votre@email.ci"></div><button class="btn-p" style="width:100%;justify-content:center;margin-top:.5rem" onclick="sendReset()"><span>Envoyer le lien</span></button></div></div>`);}
+function sendReset(){const e=$('fgE')?.value;if(!e?.includes('@')){toast('Email invalide','⚠️');return;}closeM();toast(`Lien de réinitialisation envoyé à ${e}`,'📧');}
+
+// ══════════════════════════════════════════ RECHARGE FLOW (with payment method)
+function openRechargeFlow(){
+  if(!user){openLogin(false);return;}
+  selectedPayMethod=null;
+  openM(`<div class="gm" style="max-width:500px">
+    <div class="gm-h gm-bg-sage"><button class="mclose" onclick="closeM()">✕</button><span class="gm-etag">Service prépayé</span><div class="gm-etitle">Recharger mon compte</div></div>
+    <div class="gm-body">
+      <div class="solde-box"><div class="solde-amount">${f2(user.solde)}</div><div class="solde-label">Solde actuel</div></div>
+      <div class="fr">
+        <label class="fl-l">Choisir un montant</label>
+        <div class="recharge-grid">
+          ${[5000,10000,25000,50000].map(m=>`<button class="rch-btn" onclick="setAmt('rchAmt',${m})">${m/1000}k FCFA</button>`).join('')}
+        </div>
+        <input class="fi" id="rchAmt" type="number" placeholder="Ou entrez un montant personnalisé" min="200" style="margin-top:.6rem">
+      </div>
+      <div class="fr">
+        <label class="fl-l">Mode de paiement</label>
+        <div class="pay-method-grid">
+          <button class="pay-btn" id="pm_orange" onclick="selPayMethodRC('orange',this)">🟠 Orange Money</button>
+          <button class="pay-btn" id="pm_wave" onclick="selPayMethodRC('wave',this)">💙 Wave</button>
+          <button class="pay-btn" id="pm_mtn" onclick="selPayMethodRC('mtn',this)">🟡 MTN MoMo</button>
+          <button class="pay-btn" id="pm_moov" onclick="selPayMethodRC('moov',this)">🔵 Moov Money</button>
+        </div>
+      </div>
+      <div id="rcPayDetail" style="display:none;margin-top:.4rem">
+        <div class="fr">
+          <label class="fl-l" id="rcPayLabel">Numéro de téléphone</label>
+          <input class="fi" id="rcPayPhone" placeholder="+225 07 00 00 00 00">
+        </div>
+        <div style="font-size:.72rem;color:var(--text-mid);padding:.7rem;background:var(--ivory);line-height:1.7;margin-bottom:.6rem">
+          📲 Vous recevrez une demande de confirmation sur ce numéro. Validez-la pour finaliser la recharge.
+        </div>
+      </div>
+      <button class="btn-p" style="width:100%;justify-content:center;margin-top:.4rem" onclick="processRecharge()"><span>Confirmer la recharge</span></button>
+      <p style="text-align:center;margin-top:.8rem;font-size:.72rem;color:var(--text-light)">Problème ? <span class="flink" onclick="openServiceClient()">Contacter le service client</span></p>
+    </div>
+  </div>`);
+}
+function setAmt(fieldId,amt){const el=$(fieldId);if(el)el.value=amt;}
+function selPayMethodRC(id,btn){
+  selectedPayMethod=id;
+  document.querySelectorAll('[id^="pm_"]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  $('rcPayDetail').style.display='block';
+  const labels={orange:'Numéro Orange Money',wave:'Numéro Wave',mtn:'Numéro MTN MoMo',moov:'Numéro Moov Money'};
+  $('rcPayLabel').textContent=labels[id]||'Numéro de téléphone';
+}
+function processRecharge(){
+  const amt=parseFloat($('rchAmt')?.value);
+  if(!amt||amt<500){toast('Montant minimum 200 FCFA','⚠️');return;}
+  if(!selectedPayMethod){toast('Veuillez choisir un mode de paiement','⚠️');return;}
+  const phone=$('rcPayPhone')?.value?.replace(/\s/g,'');
+  if(!phone||phone.length<8){toast('Numéro de téléphone invalide','⚠️');return;}
+  closeM();
+  toast(`Traitement du paiement via ${selectedPayMethod.toUpperCase()}…`,'⏳');
+  setTimeout(()=>{
+    user.solde+=amt;
+    updAcc();
+    toast(`✓ ${f2(amt)} crédités sur votre compte Mes Délices !`,'💳');
+    selectedPayMethod=null;
+  },2200);
+}
+
+// ══════════════════════════════════════════ WITHDRAW FLOW
+function openWithdrawFlow(){
+  if(!user) return;
+  if(user.solde<200){toast('Solde insuffisant pour un retrait (min. 200 FCFA)','⚠️');return;}
+  selectedWithdrawMethod=null;
+  const btns=[5000,10000,25000,50000].filter(m=>m<=user.solde);
+  openM(`<div class="gm" style="max-width:500px">
+    <div class="gm-h gm-bg-blush"><button class="mclose" onclick="closeM()">✕</button><span class="gm-etag">Votre solde</span><div class="gm-etitle">Retirer des fonds</div></div>
+    <div class="gm-body">
+      <div class="solde-box"><div class="solde-amount">${f2(user.solde)}</div><div class="solde-label">Solde disponible</div></div>
+      <div class="fr">
+        <label class="fl-l">Montant à retirer (FCFA)</label>
+        ${btns.length?`<div class="recharge-grid">${btns.map(m=>`<button class="rch-btn" onclick="setAmt('wdAmt',${m})">${m/1000}k</button>`).join('')}</div>`:''}
+        <input class="fi" id="wdAmt" type="number" placeholder="Montant à retirer" min="500" max="${user.solde}" style="margin-top:.6rem">
+      </div>
+      <div class="fr">
+        <label class="fl-l">Retirer vers</label>
+        <div class="pay-method-grid">
+          <button class="pay-btn" id="wd_orange" onclick="selWithdrawMethod('orange',this)">🟠 Orange Money</button>
+          <button class="pay-btn" id="wd_wave" onclick="selWithdrawMethod('wave',this)">💙 Wave</button>
+          <button class="pay-btn" id="wd_mtn" onclick="selWithdrawMethod('mtn',this)">🟡 MTN MoMo</button>
+          <button class="pay-btn" id="wd_moov" onclick="selWithdrawMethod('moov',this)">🔵 Moov Money</button>
+        </div>
+      </div>
+      <div id="wdDetail" style="display:none;margin-top:.4rem">
+        <div class="fr">
+          <label class="fl-l" id="wdLabel">Numéro de réception</label>
+          <input class="fi" id="wdPhone" placeholder="+225 07 00 00 00 00">
+        </div>
+        <div style="font-size:.72rem;color:var(--text-mid);padding:.7rem;background:var(--ivory);line-height:1.7;margin-bottom:.6rem">
+          💸 Le transfert sera effectué sous quelques minutes après confirmation.
+        </div>
+      </div>
+      <button class="btn-p" style="width:100%;justify-content:center;background:var(--blush-deep)" onclick="processWithdraw()"><span>Confirmer le retrait</span></button>
+    </div>
+  </div>`);
+}
+function selWithdrawMethod(id,btn){
+  selectedWithdrawMethod=id;
+  document.querySelectorAll('[id^="wd_"]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  $('wdDetail').style.display='block';
+  const labels={orange:'Numéro Orange Money',wave:'Numéro Wave',mtn:'Numéro MTN MoMo',moov:'Numéro Moov Money'};
+  $('wdLabel').textContent=labels[id]||'Numéro de réception';
+}
+function processWithdraw(){
+  const amt=parseFloat($('wdAmt')?.value);
+  if(!amt||amt<500){toast('Montant minimum 200 FCFA','⚠️');return;}
+  if(amt>user.solde){toast('Solde insuffisant pour ce retrait','⚠️');return;}
+  if(!selectedWithdrawMethod){toast('Choisissez un mode de retrait','⚠️');return;}
+  const phone=$('wdPhone')?.value?.replace(/\s/g,'');
+  if(!phone||phone.length<8){toast('Numéro invalide','⚠️');return;}
+  closeM();
+  toast(`Traitement du retrait vers ${selectedWithdrawMethod.toUpperCase()}…`,'⏳');
+  setTimeout(()=>{
+    user.solde-=amt;
+    updAcc();
+    toast(`${f2(amt)} transférés vers votre compte ${selectedWithdrawMethod.toUpperCase()}`,'💸');
+    selectedWithdrawMethod=null;
+  },2200);
+}
+
+// ══════════════════════════════════════════ CHECKOUT
+function openCheckout(){
+  if(!user){toast('Connectez-vous pour commander','⚠️');openLogin(false);return;}
+  if(!cart.length){toast('Votre panier est vide','⚠️');return;}
+  const total=cart.reduce((s,c)=>s+(c.isFree?0:c.price*c.qty),0);
+  const soldeOk=user.solde>=total;
+  openM(`<div class="com">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:1.4rem 2rem;border-bottom:1px solid rgba(200,169,110,.15);background:var(--ivory)">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.4rem">Finaliser la commande</div>
+      <button class="mclose" style="position:static;box-shadow:none;background:none" onclick="closeM()">✕</button>
+    </div>
+    <div class="co-body">
+      <div style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-light);margin-bottom:.8rem">Votre commande</div>
+      ${cart.map(c=>`<div class="co-row"><span>${c.e} ${c.name} (${c.size}) ×${c.qty}</span><span class="${c.isFree?'co-free':''}">${c.isFree?'🎁 Offert':f2(c.price*c.qty)}</span></div>`).join('')}
+      <div class="co-total-row"><span>Total à débiter</span><span>${f2(total)}</span></div>
+      <div class="co-solde-check ${soldeOk?'co-solde-ok':'co-solde-fail'}">
+        ${soldeOk
+          ?`✦ Solde disponible : ${f2(user.solde)} — Après commande : ${f2(user.solde-total)}`
+          :`⚠ Solde insuffisant : ${f2(user.solde)} disponible. <span class="flink" onclick="closeM();openRechargeFlow()">Recharger mon compte</span>`}
+      </div>
+      ${soldeOk?`
+      <div style="margin:1rem 0">
+        <label class="fl-l">Adresse de livraison <span style="color:var(--alert)">*</span></label>
+        <input class="fi" id="addrInp" placeholder="Ex : Cocody, Rue des Jardins, Imm. A, Apt. 3B — soyez précis·e" style="margin-top:.4rem">
+        <div class="addr-required" id="addrErr">⚠️ L'adresse de livraison est obligatoire pour confirmer votre commande.</div>
+      </div>
+      <div class="delivery-timer">
+        <div class="dt-clock">⏱ ≤ 30 min</div>
+        <div class="dt-label">Délai de livraison garanti</div>
+        <div class="delivery-guarantee">✦ Si votre livreur dépasse 30 minutes, votre commande est offerte et votre solde restitué</div>
+      </div>
+      <button class="btn-p" style="width:100%;justify-content:center;margin-top:1rem" onclick="confirmOrder(${total})"><span>Confirmer et payer ${f2(total)}</span></button>`:''}
+    </div>
+  </div>`);
+}
+
+function confirmOrder(total){
+  if(!user) return;
+  const addr=$('addrInp')?.value?.trim();
+  if(!addr){
+    const errEl=$('addrErr');
+    const inp=$('addrInp');
+    if(errEl) errEl.classList.add('show');
+    if(inp){inp.classList.add('error');inp.focus();}
+    toast('Veuillez indiquer votre adresse de livraison','⚠️');
+    return;
+  }
+  user.solde-=total;
+  const nbItems=cart.reduce((s,c)=>s+c.qty,0);
+  user.gateaux_achetes+=nbItems;
+  const assignedLv=LIVREURS[Math.floor(Math.random()*LIVREURS.length)];
+  const newOrder={
+    id:orderCounter++,clientName:`${user.prenom} ${user.nom}`,clientEmail:user.email,
+    items:cart.map(c=>({...c})),total,address:addr,
+    assignedLivreurId:assignedLv.id,assignedLivreurNom:assignedLv.nom,
+    status:'pending',startTime:null,vehicule:null,deliveryTime:null,isLate:false,createdAt:Date.now(),
+  };
+  pendingOrders.push(newOrder);
+  cart=[];updCart();updAcc();closeM();
+  toast(`Commande #${newOrder.id} confirmée ! Livreur assigné : ${assignedLv.nom} 🛵`,'🎂');
+  if(livreur&&livreur.id===assignedLv.id)setTimeout(()=>toast(`Nouvelle commande #${newOrder.id} assignée !`,'📦'),2000);
+}
+
+// ══════════════════════════════════════════ INVOICE DOWNLOAD
+function downloadInvoice(orderId){
+  const order=pendingOrders.find(o=>o.id===orderId);
+  if(!order){toast('Commande introuvable','⚠️');return;}
+  const date=new Date(order.createdAt).toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+  const rows=order.items.map(i=>`<tr><td>${i.e} ${i.name}</td><td>${i.size}</td><td style="text-align:center">${i.qty}</td><td style="text-align:right">${i.isFree?'—':f2(i.price)}</td><td style="text-align:right;font-weight:600">${i.isFree?'<span style="color:#8a9e7e">🎁 Offert</span>':f2(i.price*i.qty)}</td></tr>`).join('');
+  const totalDisplay=order.isLate?'0 FCFA (offert — retard de livraison)':f2(order.total);
+  const stampColor=order.isLate?'#e05a5a':'#8a9e7e';
+  const stampText=order.isLate?'REMBOURSÉ — Retard > 30 min':'PAYÉ';
+  const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Facture #${order.id} — Mes Délices</title><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Georgia,serif;color:#2c2c2c;background:#faf7f3;padding:40px;}@media print{body{background:#fff;padding:0;}}.inv{max-width:720px;margin:0 auto;background:#fff;padding:52px;box-shadow:0 4px 40px rgba(0,0,0,.1);}.inv-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:40px;padding-bottom:24px;border-bottom:3px solid #c8a96e;}.brand{font-size:2rem;letter-spacing:.15em;}.brand span{color:#c8a96e;font-style:italic;}.inv-meta{text-align:right;}.inv-num{font-size:1.4rem;color:#c8a96e;}.inv-date{font-size:.8rem;color:#9a9288;margin-top:.3rem;font-family:sans-serif;}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-bottom:32px;}.info-section label{font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:#9a9288;font-family:sans-serif;display:block;margin-bottom:.5rem;}p.info-val{font-size:.88rem;line-height:1.85;color:#5a5248;}table{width:100%;border-collapse:collapse;margin-bottom:20px;}th{background:#2c2c2c;color:#fff;padding:.75rem 1rem;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;font-family:sans-serif;text-align:left;}td{padding:.7rem 1rem;border-bottom:1px solid #f0ece5;font-size:.87rem;}.total-row td{border-top:2px solid #c8a96e;border-bottom:none;padding-top:1rem;font-size:1rem;}.stamp{display:inline-block;border:2.5px solid ${stampColor};color:${stampColor};padding:.5rem 1.8rem;font-size:.85rem;letter-spacing:.25em;text-transform:uppercase;font-family:sans-serif;transform:rotate(-2.5deg);margin-top:1rem;}.footer{margin-top:40px;padding-top:24px;border-top:1px solid #e8e0d4;font-size:.73rem;color:#9a9288;line-height:1.9;font-family:sans-serif;text-align:center;}</style></head><body><div class="inv"><div class="inv-head"><div class="brand">Mes <span>Délices</span></div><div class="inv-meta"><div class="inv-num">Facture #${order.id}</div><div class="inv-date">${date}</div></div></div><div class="info-grid"><div class="info-section"><label>Client</label><p class="info-val"><strong>${order.clientName}</strong><br>${order.clientEmail}<br>📍 ${order.address}</p></div><div class="info-section"><label>Livraison</label><p class="info-val">Livreur : ${order.assignedLivreurNom}<br>Véhicule : ${order.vehicule||'—'}<br>Durée : ${order.deliveryTime?Math.round(order.deliveryTime)+' min':'—'}<br>Statut : ${order.isLate?'⏱ Retard — Offert':'✓ Livré dans les délais'}</p></div></div><table><thead><tr><th>Article</th><th>Taille</th><th style="text-align:center">Qté</th><th style="text-align:right">P.U.</th><th style="text-align:right">Total</th></tr></thead><tbody>${rows}</tbody><tfoot><tr class="total-row"><td colspan="3"></td><td style="text-align:right"><strong>Total TTC</strong></td><td style="text-align:right"><strong>${totalDisplay}</strong></td></tr></tfoot></table><div style="text-align:center"><div class="stamp">${stampText}</div></div><div class="footer">Mes Délices SARL — Abidjan, Côte d'Ivoire<br>Service client : +225 07 08 09 10 11 · contact@mesdelices.ci<br>RC Abidjan N° CI-ABJ-2018-B-12345<br><br><em>Merci de votre confiance ! Ce document tient lieu de facture.</em><br><button onclick="window.print()" style="margin-top:12px;background:#2c2c2c;color:#fff;border:none;padding:8px 20px;cursor:pointer;font-family:sans-serif;font-size:.75rem;letter-spacing:.1em">🖨 Imprimer</button></div></div>
+</body></html>`;
+  const blob=new Blob([html],{type:'text/html;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`facture-mesdelices-${order.id}.html`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast(`Facture #${order.id} téléchargée`,'📄');
+}
+
+// ══════════════════════════════════════════ SERVICE CLIENT
+function openServiceClient(){
+  const myOrders=user?pendingOrders.filter(o=>o.clientEmail===user.email):[];
+  const activeOrder=myOrders.find(o=>o.status==='en_route');
+  const pendOrder=myOrders.find(o=>o.status==='pending');
+  chatAutoQs=[
+    {
+      q:'📦 Quand vais-je recevoir ma commande ?',
+      a:()=>{
+        if(activeOrder){
+          const elapsed=Math.round(elapsedMin(activeOrder.startTime));
+          const rem=Math.max(0,30-elapsed);
+          return `Votre commande <strong>#${activeOrder.id}</strong> est en route ! 🛵<br>Livreur : <strong>${activeOrder.assignedLivreurNom}</strong> (${activeOrder.vehicule})<br>Temps écoulé : <strong>${elapsed} min</strong> — Restant estimé : <strong>~${rem} min</strong>${elapsed>25?'<br>⚠️ Délai proche : si dépassé, votre commande sera <strong>offerte automatiquement</strong>.':''}`;
+        }
+        if(pendOrder) return `Votre commande <strong>#${pendOrder.id}</strong> est en file d'attente. Un livreur sera assigné très prochainement.`;
+        return `Vous n'avez pas de commande en cours. Consultez notre catalogue pour commander !`;
+      }
+    },
+    {
+      q:'🎁 Comment fonctionne la fidélité ?',
+      a:()=>`Pour chaque <strong>10 gâteaux achetés</strong>, le 10ème vous est <strong>offert automatiquement</strong> — sans démarche. Votre compteur est visible dans <em>Mon Espace → Fidélité</em>.${user?`<br>Vous êtes à <strong>${user.gateaux_achetes%10}/10</strong> gâteaux dans votre compteur actuel.`:''}`
+    },
+    {
+      q:'⏱ Mon gâteau est en retard !',
+      a:()=>{
+        if(activeOrder){
+          const elapsed=Math.round(elapsedMin(activeOrder.startTime));
+          if(elapsed>30) return `Nous confirmons le retard de la commande <strong>#${activeOrder.id}</strong> (${elapsed} min écoulées). Conformément à la <strong>Garantie 30 minutes</strong>, cette commande vous sera <strong>offerte et votre solde restitué</strong> automatiquement à la livraison.`;
+          return `Votre commande <strong>#${activeOrder.id}</strong> est encore dans le délai (${elapsed}/30 min). Patience ! Si le délai est dépassé, elle sera automatiquement offerte. 🎁`;
+        }
+        return `Appelez-nous immédiatement au <strong>+225 07 59 49 91 16</strong> pour signaler un problème.`;
+      }
+    },
+    {
+      q:'💳 Comment recharger mon compte ?',
+      a:()=>`Cliquez sur le bouton <em>Recharger</em> dans <em>Mon Espace → Profil & Solde</em>. Modes acceptés :<br>🟠 Orange Money · 💙 Wave · 🟡 MTN MoMo · 🔵 Moov Money<br>Montant minimum : <strong>200 FCFA</strong>.`
+    },
+    {
+      q:'💸 Puis-je retirer mon solde ?',
+      a:()=>`Oui ! Dans <em>Mon Espace → Retirer des fonds</em>, transférez votre solde vers votre wallet mobile (Orange Money, Wave, MTN, Moov). Minimum <strong>200 FCFA</strong>.`
+    },
+    {
+      q:'📄 Obtenir ma facture',
+      a:()=>{
+        const done=myOrders.filter(o=>o.status==='delivered');
+        if(done.length) return `Vos factures sont disponibles dans <em>Mon Espace → Commandes</em>. Cliquez sur <strong>"📄 Facture"</strong> à côté de chaque commande livrée pour la télécharger.`;
+        return `Les factures sont disponibles dans <em>Mon Espace → Commandes</em> pour chaque commande livrée.`;
+      }
+    },
+    {
+      q:'❌ Annuler ma commande',
+      a:()=>`Appelez-nous au <strong>+225 07 59 49 91 16</strong> dès que possible. Une annulation n'est possible que si le livreur n'a pas encore démarré la livraison.`
+    },
+  ];
+
+  openM(`<div class="gm" style="max-width:580px">
+    <div class="gm-h gm-bg-dark">
+      <button class="mclose mclose-dark" onclick="closeM()">✕</button>
+      <span class="gm-etag">Assistance Mes Délices</span>
+      <div class="gm-etitle" style="color:white">💬 Service Client</div>
+    </div>
+    <div class="gm-body" style="padding-top:1.4rem">
+      <div style="text-align:center;background:var(--ivory);padding:1.2rem 1.4rem;margin-bottom:1.4rem;border:1px solid rgba(200,169,110,.2);position:relative">
+        <div style="font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--text-light);margin-bottom:.4rem">📞 Ligne directe</div>
+        <a href="tel:+2250759499116" style="font-family:'Cormorant Garamond',serif;font-size:1.85rem;color:var(--charcoal);text-decoration:none;letter-spacing:.05em">+225 07 59 49 91 16</a>
+        <div style="font-size:.72rem;color:var(--text-mid);margin-top:.3rem">Disponible <strong>7j/7</strong> de <strong>8h à 22h</strong></div>
+        <a href="tel:+2250759499116" style="display:inline-block;margin-top:.7rem;background:var(--charcoal);color:var(--gold);border:1px solid var(--gold);padding:.35rem 1rem;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;font-family:'Jost',sans-serif;text-decoration:none">Appeler maintenant</a>
+      </div>
+
+      <div id="chatArea" style="min-height:120px;max-height:250px;overflow-y:auto;background:var(--ivory);padding:1rem;margin-bottom:1rem;border:1px solid rgba(200,169,110,.12)">
+        <div class="chat-msg">
+          <span class="chat-av">🎂</span>
+          <div class="chat-bubble">Bonjour ${user?`<strong>${user.prenom}</strong>`:''} ! Je suis l'assistant Mes Délices. Comment puis-je vous aider ?</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:1rem">
+        <div style="font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-light);margin-bottom:.5rem">Questions fréquentes</div>
+        <div style="display:flex;flex-direction:column;gap:.35rem">
+          ${chatAutoQs.map((q,i)=>`<button class="srch-stag" style="text-align:left;padding:.5rem .9rem" onclick="askChatQ(${i})">${q.q}</button>`).join('')}
+        </div>
+      </div>
+
+      <div style="display:flex;gap:.6rem">
+        <input class="fi" id="chatInp" placeholder="Posez votre question…" style="flex:1" onkeypress="if(event.key==='Enter')sendChat()">
+        <button class="btn-p" style="padding:.8rem 1.2rem;flex-shrink:0" onclick="sendChat()"><span>→</span></button>
+      </div>
+    </div>
+  </div>`);
+}
+
+function askChatQ(i){
+  const q=chatAutoQs[i];if(!q) return;
+  const area=$('chatArea');if(!area) return;
+  const qText=q.q.replace(/^.{1,3}\s/,'');
+  area.innerHTML+=`<div class="chat-msg chat-user"><span class="chat-av" style="background:var(--sage-pale)">👤</span><div class="chat-bubble">${qText}</div></div>`;
+  area.innerHTML+=`<div class="chat-msg" id="chatTyping"><span class="chat-av">🎂</span><div class="chat-bubble"><div class="chat-typing"><div class="chat-dot"></div><div class="chat-dot"></div><div class="chat-dot"></div></div></div></div>`;
+  area.scrollTop=area.scrollHeight;
+  setTimeout(()=>{
+    const typing=$('chatTyping');if(typing) typing.remove();
+    const ans=typeof q.a==='function'?q.a():q.a;
+    area.innerHTML+=`<div class="chat-msg"><span class="chat-av">🎂</span><div class="chat-bubble">${ans}</div></div>`;
+    area.scrollTop=area.scrollHeight;
+  },700);
+}
+function sendChat(){
+  const inp=$('chatInp');
+  const v=inp?.value?.trim();
+  if(!v) return;
+  const area=$('chatArea');
+  area.innerHTML+=`<div class="chat-msg chat-user"><span class="chat-av" style="background:var(--sage-pale)">👤</span><div class="chat-bubble">${v}</div></div>`;
+  inp.value='';
+  area.innerHTML+=`<div class="chat-msg" id="chatTyping2"><span class="chat-av">🎂</span><div class="chat-bubble"><div class="chat-typing"><div class="chat-dot"></div><div class="chat-dot"></div><div class="chat-dot"></div></div></div></div>`;
+  area.scrollTop=area.scrollHeight;
+  setTimeout(()=>{
+    const t=$('chatTyping2');if(t)t.remove();
+    area.innerHTML+=`<div class="chat-msg"><span class="chat-av">🎂</span><div class="chat-bubble">Merci pour votre message ! Notre équipe vous répondra sous 2h. Pour une aide immédiate, appelez le <strong>+225 07 59 49 91 16</strong> (7j/7, 8h–22h).</div></div>`;
+    area.scrollTop=area.scrollHeight;
+  },900);
+}
+
+// ══════════════════════════════════════════ LIVREUR
+function openLivreurLogin(){
+  openM(`<div class="gm" style="max-width:480px">
+    <div class="gm-h gm-bg-dark"><button class="mclose mclose-dark" onclick="closeM()">✕</button><span class="gm-etag">Espace professionnel</span><div class="gm-etitle" style="color:white">🛵 Connexion Livreur</div></div>
+    <div class="gm-body">
+      <div style="background:rgba(200,169,110,.08);border:1px solid rgba(200,169,110,.2);padding:1rem;margin-bottom:1.4rem;font-size:.78rem;color:var(--text-mid);line-height:1.75">
+        <strong>exemple Identifiant </strong><br>Sélectionnez votre nom · Mot de passe : <span style="font-family:monospace;background:var(--ivory);padding:.1rem .4rem">livreur123</span>
+      </div>
+      <div class="fr"><label class="fl-l">Votre nom</label><select class="fi" id="lvSelect">${LIVREURS.map(l=>`<option value="${l.id}">${l.nom}</option>`).join('')}</select></div>
+      <div class="fr"><label class="fl-l">Mot de passe</label><input class="fi" id="lvPw" type="password" placeholder="00000000"></div>
+      <button class="btn-p" style="width:100%;justify-content:center;margin-top:.4rem" onclick="doLivreurLogin()"><span>Accéder à mon espace</span></button>
+      <p style="text-align:center;margin-top:1rem;font-size:.72rem;color:var(--text-light)">Vous êtes un client ? <span class="flink" onclick="openLogin(false)">Connexion client</span></p>
+    </div>
+  </div>`);
+}
+function doLivreurLogin(){
+  const id=parseInt($('lvSelect')?.value);
+  const pw=$('lvPw')?.value;
+  if(pw!=='19010804'){toast('Mot de passe incorrect','⚠️');return;}
+  livreur=LIVREURS.find(l=>l.id===id);
+  if(!livreur){toast('Livreur introuvable','⚠️');return;}
+  $('livreurBadge').classList.add('show');
+  $('livreurHdr').textContent=livreur.nom;
+  closeM();
+  toast(`Bienvenue, ${livreur.nom} ! 🛵`,'🛵');
+  setTimeout(openLivreurDash,200);
+}
+
+function openLivreurDash(){
+  if(!livreur){openLivreurLogin();return;}
+  // Arrêter les timers existants
+  Object.keys(lvTimerIntervals).forEach(k=>{clearInterval(lvTimerIntervals[k]);delete lvTimerIntervals[k];});
+
+  const myOrders=pendingOrders.filter(o=>o.assignedLivreurId===livreur.id);
+  const pending=myOrders.filter(o=>o.status==='pending');
+  const enRoute=myOrders.filter(o=>o.status==='en_route');
+  const done=myOrders.filter(o=>o.status==='delivered');
+  const lvData=LIVREURS.find(l=>l.id===livreur.id);
+
+  openM(`<div class="gm" style="max-width:660px">
+    <div class="gm-h gm-bg-dark">
+      <button class="mclose mclose-dark" onclick="closeM()">✕</button>
+      <span class="gm-etag">Tableau de bord livreur</span>
+      <div class="gm-etitle" style="color:white">🛵 ${livreur.nom}</div>
+    </div>
+    <div class="gm-body">
+
+      <!-- KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-bottom:1.4rem">
+        <div style="background:var(--ivory);padding:.9rem;text-align:center">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;line-height:1">${pending.length+enRoute.length}</div>
+          <div style="font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-light);margin-top:.2rem">En cours</div>
+        </div>
+        <div style="background:var(--sage-pale);padding:.9rem;text-align:center">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;line-height:1;color:var(--sage)">${done.length}</div>
+          <div style="font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--sage);margin-top:.2rem">Livrées</div>
+        </div>
+        <div style="background:var(--alert-pale);padding:.9rem;text-align:center">
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;line-height:1;color:var(--alert)">${lvData.retards}</div>
+          <div style="font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--alert);margin-top:.2rem">Retards</div>
+        </div>
+      </div>
+
+      <div class="tabs-r">
+        <button class="tab-b on" onclick="swLv('lvA')">En attente (${pending.length})</button>
+        <button class="tab-b" onclick="swLv('lvR')">En route (${enRoute.length})</button>
+        <button class="tab-b" onclick="swLv('lvH')">Historique (${done.length})</button>
+        <button class="tab-b" onclick="swLv('lvS')">Mes stats</button>
+      </div>
+
+      <!-- TAB : EN ATTENTE -->
+      <div id="lvA" class="tpanel on">
+        ${pending.length===0
+          ?`<div style="text-align:center;padding:2.5rem;color:var(--text-light)">
+              <div style="font-size:3rem;opacity:.25">📦</div>
+              <p style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;margin-top:.6rem">Aucune commande en attente</p>
+              <p style="font-size:.75rem;margin-top:.3rem">Actualisez pour vérifier</p>
+            </div>`
+          :pending.map(o=>`
+          <div class="lv-order-card">
+            <div class="lv-order-header">
+              <div>
+                <div class="lv-order-id">Commande #${o.id}</div>
+                <div class="lv-order-client">${o.clientName} · ${f2(o.total)}</div>
+              </div>
+              <div class="os">EN ATTENTE</div>
+            </div>
+            <div style="font-size:.75rem;color:var(--text-mid);margin-bottom:.5rem;line-height:1.7">
+              ${o.items.map(i=>`${i.e} <strong>${i.name}</strong> (${i.size}) ×${i.qty}`).join('<br>')}
+            </div>
+            <div style="font-size:.72rem;color:var(--text-light);margin-bottom:.2rem">📍 <strong>${o.address}</strong></div>
+            <div style="font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-light);margin:.8rem 0 .4rem">Choisir le véhicule</div>
+            <div class="veh-selector" id="veh_sel_${o.id}">
+              <button class="veh-btn on" onclick="selVeh(${o.id},'Voiture',this)">🚗 Voiture</button>
+              <button class="veh-btn" onclick="selVeh(${o.id},'Moto',this)">🏍 Moto</button>
+            </div>
+            <button class="btn-p" style="width:100%;justify-content:center;padding:.75rem;margin-top:.4rem" onclick="startDelivery(${o.id})">
+              <span>🛵 Démarrer la livraison</span>
+            </button>
+          </div>`).join('')}
+      </div>
+
+      <!-- TAB : EN ROUTE -->
+      <div id="lvR" class="tpanel">
+        ${enRoute.length===0
+          ?`<div style="text-align:center;padding:2.5rem;color:var(--text-light)">
+              <div style="font-size:3rem;opacity:.25">🛵</div>
+              <p style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;margin-top:.6rem">Aucune livraison en cours</p>
+            </div>`
+          :enRoute.map(o=>{
+            const elapsed=Math.floor(elapsedMin(o.startTime));
+            const warn=elapsed>=25;
+            return `
+            <div class="lv-order-card ${warn?'warning':'en-route'}" id="ocard_${o.id}">
+              <div class="lv-order-header">
+                <div>
+                  <div class="lv-order-id">Commande #${o.id}</div>
+                  <div class="lv-order-client">${o.clientName} · ${o.vehicule==='Voiture'?'🚗':'🏍'} ${o.vehicule}</div>
+                </div>
+                <div class="os route">EN ROUTE</div>
+              </div>
+              <div style="text-align:center;padding:1rem 0">
+                <div class="lv-timer ${warn?'warning':''}" id="lv_timer_${o.id}">${fmtTime(Date.now()-o.startTime)}</div>
+                <div class="lv-timer-label">Temps écoulé / 30:00</div>
+                <div class="lv-timer-bar">
+                  <div id="lv_bar_${o.id}" class="lv-timer-fill" style="width:${Math.min(100,elapsedMin(o.startTime)/30*100)}%;background:${warn?'var(--alert)':'var(--gold)'}"></div>
+                </div>
+              </div>
+              <div style="font-size:.72rem;color:var(--text-mid);margin-bottom:.6rem;line-height:1.6">
+                ${o.items.map(i=>`${i.e} ${i.name} (${i.size})`).join(' · ')}<br>
+                📍 <strong>${o.address}</strong>
+              </div>
+              ${warn?`<div style="font-size:.74rem;color:var(--alert);padding:.5rem .8rem;background:var(--alert-pale);margin-bottom:.7rem">⚠️ Attention : vous approchez des 30 minutes. Dépêchez-vous !</div>`:''}
+              <button class="btn-p" style="width:100%;justify-content:center;padding:.8rem;${warn?'background:var(--alert)':''}" onclick="completeDelivery(${o.id})">
+                <span>✓ Livraison effectuée</span>
+              </button>
+            </div>`;
+          }).join('')}
+      </div>
+
+      <!-- TAB : HISTORIQUE -->
+      <div id="lvH" class="tpanel">
+        ${done.length===0
+          ?`<p style="text-align:center;padding:2rem;color:var(--text-light);font-family:'Cormorant Garamond',serif;font-size:1.1rem">Aucun historique</p>`
+          :done.map(o=>`
+          <div class="oi">
+            <span style="font-size:1.6rem">${o.isLate?'⏱':'✓'}</span>
+            <div style="flex:1">
+              <div style="font-family:'Cormorant Garamond',serif;font-size:.9rem">Commande #${o.id} — ${o.clientName}</div>
+              <div style="font-size:.68rem;color:var(--text-light)">${o.vehicule==='Voiture'?'🚗':'🏍'} ${o.vehicule} · ${Math.round(o.deliveryTime)} min · ${o.isLate?'RETARD — offert au client':'Dans les délais'}</div>
+              <div style="font-size:.68rem;color:var(--text-light)">📍 ${o.address}</div>
+            </div>
+            <div class="os ${o.isLate?'ret':''}">${o.isLate?'Retard':'Livré ✓'}</div>
+          </div>`).join('')}
+      </div>
+
+      <!-- TAB : STATS PERSO -->
+      <div id="lvS" class="tpanel">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem">
+          <div style="background:var(--ivory);padding:1.2rem;text-align:center">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:2rem">${lvData.livraisons+done.length}</div>
+            <div style="font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-light);margin-top:.2rem">Total livraisons</div>
+          </div>
+          <div style="background:${lvData.retards===0?'var(--sage-pale)':'var(--alert-pale)'};padding:1.2rem;text-align:center">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:${lvData.retards===0?'var(--sage)':'var(--alert)'}">${lvData.retards}</div>
+            <div style="font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:${lvData.retards===0?'var(--sage)':'var(--alert)'};margin-top:.2rem">${lvData.retards===0?'✦ Aucun retard !':'Retard'+(lvData.retards>1?'s':'')}</div>
+          </div>
+        </div>
+        ${done.length>0?`
+        <div style="background:var(--ivory);padding:1rem;margin-bottom:1rem">
+          <div style="font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-light);margin-bottom:.5rem">Temps moyen de livraison</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem">${Math.round(done.reduce((s,o)=>s+o.deliveryTime,0)/done.length)} <span style="font-size:1rem;font-family:'Jost',sans-serif;color:var(--text-light)">min</span></div>
+        </div>`:''}
+        <div style="font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-light);margin-bottom:.5rem">Véhicules utilisés</div>
+        ${['Voiture','Moto'].map(v=>{
+          const n=done.filter(o=>o.vehicule===v).length;
+          const pct=done.length?Math.round(n/done.length*100):0;
+          return `<div style="margin-bottom:.6rem">
+            <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.3rem"><span>${v==='Voiture'?'🚗':'🏍'} ${v}</span><span>${n} livraison${n>1?'s':''} (${pct}%)</span></div>
+            <div style="height:4px;background:rgba(200,169,110,.15);border-radius:2px"><div style="height:100%;width:${pct}%;background:var(--gold);border-radius:2px"></div></div>
+          </div>`;
+        }).join('')}
+        <div style="margin-top:1.4rem;padding-top:1rem;border-top:1px solid rgba(200,169,110,.15);display:flex;justify-content:space-between;align-items:center">
+          <button style="background:none;border:none;cursor:pointer;color:var(--blush-deep);font-size:.78rem;font-family:'Jost',sans-serif" onclick="logoutLivreur()">Se déconnecter</button>
+          <button class="btn-o" style="padding:.5rem 1rem;font-size:.62rem" onclick="closeM();openStats()"><span>📊 Stats globales</span></button>
+        </div>
+      </div>
+    </div>
+  </div>`);
+
+  // Lancer les timers live pour les commandes en route
+  enRoute.forEach(o=>{
+    lvTimerIntervals[o.id]=setInterval(()=>{
+      const elapsed=Date.now()-o.startTime;
+      const elMin=elapsed/1000/60;
+      const warn=elMin>=25;
+      const el=$(`lv_timer_${o.id}`);
+      const bar=$(`lv_bar_${o.id}`);
+      const card=$(`ocard_${o.id}`);
+      if(el){el.textContent=fmtTime(elapsed);el.classList.toggle('warning',warn);}
+      if(bar){bar.style.width=Math.min(100,elMin/30*100)+'%';bar.style.background=warn?'var(--alert)':'var(--gold)';}
+      if(card){card.classList.toggle('warning',warn);card.classList.toggle('en-route',!warn);}
+    },1000);
+  });
+}
+
+function selVeh(orderId,veh,btn){
+  if(!window._vehSelect) window._vehSelect={};
+  window._vehSelect[orderId]=veh;
+  btn.closest('.veh-selector').querySelectorAll('.veh-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+function swLv(id){
+  document.querySelectorAll('.tpanel,.tab-b').forEach(e=>e.classList.remove('on'));
+  $(id)?.classList.add('on');
+  const idx=['lvA','lvR','lvH','lvS'].indexOf(id);
+  document.querySelectorAll('.tab-b')[idx]?.classList.add('on');
+}
+
+function startDelivery(orderId){
+  const order=pendingOrders.find(o=>o.id===orderId);
+  if(!order) return;
+  order.vehicule=(window._vehSelect&&window._vehSelect[orderId])||'Voiture';
+  order.startTime=Date.now();
+  order.status='en_route';
+  toast(`Livraison #${orderId} démarrée en ${order.vehicule} — Chrono lancé ⏱`,'🛵');
+  closeM();
+  setTimeout(openLivreurDash,200);
+}
+
+function completeDelivery(orderId){
+  const order=pendingOrders.find(o=>o.id===orderId);
+  if(!order||!order.startTime) return;
+  if(lvTimerIntervals[orderId]){clearInterval(lvTimerIntervals[orderId]);delete lvTimerIntervals[orderId];}
+  const elapsed=elapsedMin(order.startTime);
+  const isLate=elapsed>30;
+  order.status='delivered';
+  order.deliveryTime=elapsed;
+  order.isLate=isLate;
+  if(isLate){
+    livreur.retards++;
+    const lv=LIVREURS.find(l=>l.id===livreur.id);
+    if(lv) lv.retards++;
+  }
+  LIVREURS.find(l=>l.id===livreur.id).livraisons++;
+  // Remboursement automatique si retard
+  if(isLate){
+    if(user&&user.email===order.clientEmail){user.solde+=order.total;updAcc();}
+    toast(`⏱ Retard ${Math.round(elapsed)} min — Commande #${orderId} offerte au client, solde restitué`,'⏱');
+  } else {
+    toast(`✓ Livraison #${orderId} en ${Math.round(elapsed)} min — Bravo !`,'✓');
+  }
+  closeM();
+  setTimeout(openLivreurDash,200);
+}
+
+function logoutLivreur(){
+  Object.keys(lvTimerIntervals).forEach(k=>{clearInterval(lvTimerIntervals[k]);delete lvTimerIntervals[k];});
+  livreur=null;
+  $('livreurBadge').classList.remove('show');
+  closeM();
+  toast('Déconnecté de l\'espace livreur','👋');
+}
+
+// ══════════════════════════════════════════ STATISTIQUES
+function openStats(){
+  const allDone=pendingOrders.filter(o=>o.status==='delivered');
+  const custMap={};
+  allDone.forEach(o=>{
+    if(!custMap[o.clientName]) custMap[o.clientName]={name:o.clientName,count:0,spent:0};
+    custMap[o.clientName].count++;
+    custMap[o.clientName].spent+=o.isLate?0:o.total;
+  });
+  const custList=Object.values(custMap).sort((a,b)=>b.count-a.count);
+  const bestCustomer=custList[0];
+  const worstLv=[...LIVREURS].sort((a,b)=>b.retards-a.retards)[0];
+  const cakeMap={};
+  PRODS.forEach(p=>{cakeMap[p.name]={name:p.name,e:p.e,count:p.reviews};});
+  allDone.forEach(o=>o.items.forEach(i=>{
+    if(!cakeMap[i.name]) cakeMap[i.name]={name:i.name,e:i.e,count:0};
+    cakeMap[i.name].count+=i.qty;
+  }));
+  const cakeList=Object.values(cakeMap).sort((a,b)=>b.count-a.count);
+  const topCake=cakeList[0];
+  const botCake=cakeList[cakeList.length-1];
+  const revenue=allDone.reduce((s,o)=>s+(o.isLate?0:o.total),0);
+  const retards=allDone.filter(o=>o.isLate).length;
+  const maxRetards=Math.max(1,...LIVREURS.map(l=>l.retards));
+
+  openM(`<div class="gm" style="max-width:680px">
+    <div class="gm-h gm-bg-dark">
+      <button class="mclose mclose-dark" onclick="closeM()">✕</button>
+      <span class="gm-etag">Administration</span>
+      <div class="gm-etitle" style="color:white">📊 Statistiques & Activité</div>
+    </div>
+    <div class="gm-body">
+
+      <div style="background:var(--charcoal);border:1px solid rgba(200,169,110,.25);padding:1.6rem;text-align:center;margin-bottom:1.4rem">
+        <div style="font-size:.6rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:.4rem">Chiffre d'affaires</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:3rem;color:white;line-height:1">${f2(revenue)}</div>
+        <div style="font-size:.7rem;color:rgba(255,255,255,.4);margin-top:.4rem">${allDone.length} livraison${allDone.length>1?'s':''} · ${retards} retard${retards>1?'s':''} remboursés</div>
+      </div>
+
+      <div class="stat-kpi">
+        <div class="stat-kpi-card" style="background:var(--sage-pale)">
+          <div style="font-size:2rem;margin-bottom:.3rem">🏆</div>
+          <div class="stat-kpi-val" style="color:var(--sage)">${bestCustomer?bestCustomer.name:'—'}</div>
+          <div class="stat-kpi-label" style="color:var(--sage)">${bestCustomer?bestCustomer.count+' commande'+(bestCustomer.count>1?'s':''):''}</div>
+          <div style="font-size:.62rem;color:var(--text-light);margin-top:.2rem">Meilleur client</div>
+        </div>
+        <div class="stat-kpi-card" style="background:var(--alert-pale)">
+          <div style="font-size:2rem;margin-bottom:.3rem">⚠️</div>
+          <div class="stat-kpi-val" style="color:var(--alert)">${worstLv.nom}</div>
+          <div class="stat-kpi-label" style="color:var(--alert)">${worstLv.retards} retard${worstLv.retards>1?'s':''}</div>
+          <div style="font-size:.62rem;color:var(--text-light);margin-top:.2rem">Plus de retards</div>
+        </div>
+        <div class="stat-kpi-card" style="background:rgba(200,169,110,.1);border:1px solid rgba(200,169,110,.2)">
+          <div style="font-size:2rem;margin-bottom:.3rem">${topCake?topCake.e:'🎂'}</div>
+          <div class="stat-kpi-val">${topCake?topCake.name:'—'}</div>
+          <div class="stat-kpi-label">${topCake?topCake.count+' cmd':''}</div>
+          <div style="font-size:.62rem;color:var(--text-light);margin-top:.2rem">Gâteau + demandé</div>
+        </div>
+        <div class="stat-kpi-card" style="background:var(--ivory)">
+          <div style="font-size:2rem;margin-bottom:.3rem">${botCake?botCake.e:'🎂'}</div>
+          <div class="stat-kpi-val">${botCake?botCake.name:'—'}</div>
+          <div class="stat-kpi-label">${botCake?botCake.count+' cmd':''}</div>
+          <div style="font-size:.62rem;color:var(--text-light);margin-top:.2rem">Gâteau − demandé</div>
+        </div>
+      </div>
+
+      <div style="font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;color:var(--text-light);margin-bottom:.8rem;padding-top:.4rem">Classement des livreurs</div>
+      ${[...LIVREURS].sort((a,b)=>b.retards-a.retards).map((lv,i)=>{
+        const lvDone=allDone.filter(o=>o.assignedLivreurId===lv.id);
+        const avg=lvDone.length?Math.round(lvDone.reduce((s,o)=>s+o.deliveryTime,0)/lvDone.length):null;
+        const barPct=Math.round(lv.retards/maxRetards*100);
+        const voit=lvDone.filter(o=>o.vehicule==='Voiture').length;
+        const moto=lvDone.filter(o=>o.vehicule==='Moto').length;
+        return `<div class="stat-livreur-row">
+          <div class="stat-rank">${i+1}</div>
+          <div style="flex:1">
+            <div style="font-size:.88rem;font-weight:400">${lv.nom}</div>
+            <div style="font-size:.68rem;color:var(--text-light);margin-top:.1rem">${lv.livraisons} livraison${lv.livraisons>1?'s':''} · ${avg!==null?avg+' min moy.':'—'} · 🚗${voit} 🏍${moto}</div>
+            <div class="stat-retard-bar"><div class="stat-retard-fill" style="width:${barPct}%"></div></div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:.85rem;color:${lv.retards===0?'var(--sage)':'var(--alert)'}">${lv.retards} retard${lv.retards>1?'s':''}</div>
+            <div style="font-size:.65rem;color:var(--text-light)">${lv.retards===0?'✦ Parfait !':''}</div>
+          </div>
+        </div>`;
+      }).join('')}
+
+      <div style="font-size:.65rem;letter-spacing:.22em;text-transform:uppercase;color:var(--text-light);margin:1.4rem 0 .8rem">Popularité des gâteaux</div>
+      ${cakeList.slice(0,5).map((c,i)=>{
+        const maxC=cakeList[0].count||1;
+        return `<div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem">
+          <span style="font-size:1.3rem;width:24px;text-align:center">${c.e}</span>
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.25rem"><span>${c.name}</span><span style="color:var(--text-light)">${c.count}</span></div>
+            <div style="height:4px;background:rgba(200,169,110,.12);border-radius:2px"><div style="height:100%;width:${Math.round(c.count/maxC*100)}%;background:${i===0?'var(--gold)':i===cakeList.length-1?'var(--blush-deep)':'rgba(200,169,110,.5)'};border-radius:2px;transition:width .6s"></div></div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`);
+}
+
+// ══════════════════════════════════════════ FAQ
+function openFaq(){
+  const fqs=[
+    {q:'Comment fonctionne le service prépayé ?',a:'Vous créez un compte, rechargez votre solde via Orange Money, Wave, MTN MoMo ou Moov Money, puis passez commande. Votre solde est débité au moment de la confirmation.'},
+    {q:'Que se passe-t-il si je n\'ai pas assez de solde ?',a:'La commande est refusée et aucune préparation ne commence. Un message vous informe avec un lien vers la recharge.'},
+    {q:'Comment fonctionne le gâteau gratuit tous les 10 ?',a:'À chaque 10ème gâteau acheté, le suivant vous est offert automatiquement — sans démarche. Votre compteur est visible dans Mon Espace → Fidélité.'},
+    {q:'Le délai de 30 minutes est-il vraiment garanti ?',a:'Oui. Si votre livreur met plus de 30 minutes, votre commande est intégralement offerte et votre solde restitué sans démarche de votre part.'},
+    {q:'Peut-on choisir son livreur ou son véhicule ?',a:'Non. Les livreurs sont assignés automatiquement selon leur disponibilité. Ils utilisent voiture ou moto selon les conditions.'},
+    {q:'Les 3 tailles de gâteau, comment sont calculés les prix ?',a:'Le prix de base correspond à la taille Moyenne. La Petite coûte 1/3 de moins, et la Grande 1/3 de plus que la Moyenne.'},
+    {q:'Puis-je retirer mon solde ?',a:'Oui ! Dans Mon Espace → Retirer des fonds, vous pouvez transférer votre solde vers votre wallet mobile (Orange Money, Wave, MTN, Moov). Montant minimum : 200 FCFA.'},
+    {q:'Comment télécharger ma facture ?',a:'Dans Mon Espace → Commandes, cliquez sur le bouton "📄 Facture" à côté de chaque commande livrée.'},
+  ];
+  openM(`<div class="gm"><div class="gm-h gm-bg-sage"><button class="mclose" onclick="closeM()">✕</button><span class="gm-etag">Questions fréquentes</span><div class="gm-etitle">FAQ</div></div>
+    <div class="gm-body">
+      ${fqs.map((f,i)=>`<div style="margin-bottom:.8rem;border-bottom:1px solid rgba(200,169,110,.14);padding-bottom:.8rem">
+        <div style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem" onclick="tfaq(${i})">
+          <strong style="font-family:'Cormorant Garamond',serif;font-size:.98rem">${f.q}</strong>
+          <span id="fi${i}" style="color:var(--gold);font-size:1.3rem;flex-shrink:0;transition:transform .3s">+</span>
+        </div>
+        <div id="fa${i}" style="display:none;font-size:.8rem;color:var(--text-mid);line-height:1.75;margin-top:.7rem;padding-left:.5rem">${f.a}</div>
+      </div>`).join('')}
+    </div>
+  </div>`);
+}
+function tfaq(i){const a=$(`fa${i}`),ic=$(`fi${i}`);const o=a.style.display==='block';a.style.display=o?'none':'block';ic.textContent=o?'+':'−';}
+
+// ══════════════════════════════════════════ NEWSLETTER
+function subNl(){
+  const i=$('nlInp');
+  if(!i.value||!i.value.includes('@')){toast('Veuillez entrer un email valide','⚠️');return;}
+  openM(`<div class="gm"><div class="gm-h gm-bg-sage"><button class="mclose" onclick="closeM()">✕</button><span class="gm-etag">Newsletter & Compte</span><div class="gm-etitle">Créer un compte pour recevoir nos offres</div></div>
+    <div class="gm-body">
+      <p style="font-size:.8rem;color:var(--text-mid);margin-bottom:1.4rem;line-height:1.7">Créez un compte pour accéder à votre solde, commander et recevoir nos nouveautés par e-mail.</p>
+      <div class="fr"><label class="fl-l">Nom d'utilisateur</label><input class="fi" id="nlUser" placeholder="Votre nom d'utilisateur"></div>
+      <div class="fr"><label class="fl-l">Mot de passe</label><input class="fi" type="password" id="nlPw" placeholder="6 caractères minimum"></div>
+      <button class="btn-p" style="width:100%;justify-content:center;margin-top:1rem" onclick="doNlReg('${i.value}')"><span>S'inscrire & Créer compte</span></button>
+      <p style="text-align:center;margin-top:1rem;font-size:.72rem;color:var(--text-light)">Déjà un compte ? <span class="flink" onclick="closeM();openLogin(false)">Se connecter</span></p>
+    </div>
+  </div>`);
+  i.value='';
+}
+
+function doNlReg(email){
+  const u=$('nlUser'), p=$('nlPw');
+  if(!u.value){toast('Nom d\'utilisateur requis','⚠️');return;}
+  if(!p.value||p.value.length<6){toast('Mot de passe : 6 caractères min.','⚠️');return;}
+  if(subs.includes(email)){toast('Vous êtes déjà inscrit·e à la newsletter !','ℹ️');return;}
+  // Create user account
+  user={prenom:u.value,nom:'Newsletter',email:email,solde:0,gateaux_achetes:0,telephone:''};
+  updAcc();
+  // Subscribe to newsletter
+  subs.push(email);
+  closeM();
+  openM(`<div class="gm"><div class="gm-h gm-bg-sage"><button class="mclose" onclick="closeM()">✕</button><span class="gm-etag">Bienvenue !</span><div class="gm-etitle">🎂 Compte créé & Newsletter</div></div>
+    <div class="gm-body" style="text-align:center">
+      <p style="font-size:.9rem;margin-bottom:1rem">Votre compte a été créé et vous êtes inscrit·e à la newsletter !</p>
+      <p style="font-size:.8rem;color:var(--text-mid);line-height:1.6">Vous recevrez nos nouveautés et offres exclusives. Rechargez votre compte pour commander.</p>
+      <p style="font-size:.75rem;color:var(--text-light);margin-top:1rem">👤 ${u.value} · 📧 ${email}</p>
+      <button class="btn-p" style="margin-top:1.5rem" onclick="closeM()"><span>Commencer !</span></button>
+    </div>
+  </div>`);
+}
+
+// ══════════════════════════════════════════ LÉGAL
+function openMentions(){
+  openM(`<div class="gm"><div class="gm-h gm-bg-sage"><button class="mclose" onclick="closeM()">✕</button><span class="gm-etag">Légal</span><div class="gm-etitle">Mentions Légales & CGV</div></div>
+    <div class="gm-body" style="font-size:.8rem;color:var(--text-mid);line-height:1.85">
+      <strong>Éditeur du site</strong><br>Mes Délices SARL — Abidjan, Côte d'Ivoire<br>RC Abidjan N° CI-ABJ-2018-B-12345<br><br>
+      <strong>Données personnelles</strong><br>Vos données sont traitées conformément à la loi ivoirienne sur la protection des données personnelles.<br><br>
+      <strong>Conditions générales de vente</strong><br>Prix indiqués TTC. Service prépayé : le solde est débité à la confirmation de commande. Tout gâteau livré au-delà de 30 minutes est offert et non facturé. Programme de fidélité : 1 gâteau offert tous les 10 achetés. Le retrait de fonds est disponible via mobile money (min. 200 FCFA).<br><br>
+      <strong>Propriété intellectuelle</strong><br>Tous les éléments du site sont la propriété de Mes Délices SARL.<br><br>
+      <strong>Contact légal</strong><br>contact@mesdelices.ci · +225 07 59 49 91 16
+    </div>
+  </div>`);
+}
+
+function openCookies(){
+  openM(`<div class="gm"><div class="gm-h gm-bg-sage"><button class="mclose" onclick="closeM()">✕</button><span class="gm-etag">Gestion</span><div class="gm-etitle">Gestion des Cookies</div></div>
+    <div class="gm-body">
+      <p style="font-size:.8rem;color:var(--text-mid);margin-bottom:1.4rem">Nous utilisons des cookies pour améliorer votre expérience sur Mes Délices.</p>
+      <div style="padding:.9rem 0;border-bottom:1px solid rgba(200,169,110,.14)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div><strong style="font-size:.85rem">Cookies essentiels</strong><p style="font-size:.75rem;color:var(--text-light);margin-top:.2rem">Nécessaires au fonctionnement. Non désactivables.</p></div>
+          <span style="color:var(--sage);font-size:.75rem;margin-top:3px">Actif</span>
+        </div>
+      </div>
+      <div style="padding:.9rem 0;border-bottom:1px solid rgba(200,169,110,.14)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div><strong style="font-size:.85rem">Cookies analytiques</strong><p style="font-size:.75rem;color:var(--text-light);margin-top:.2rem">Nous aident à améliorer nos services.</p></div>
+          <input type="checkbox" checked style="accent-color:var(--gold);margin-top:3px">
+        </div>
+      </div>
+      <div style="margin-top:1.4rem;display:flex;gap:.8rem">
+        <button class="btn-p" style="flex:1;justify-content:center" onclick="closeM();toast('Préférences sauvegardées','✓')"><span>Sauvegarder</span></button>
+        <button class="btn-o" style="flex:1;justify-content:center" onclick="closeM();toast('Cookies acceptés','✓')"><span>Tout accepter</span></button>
+      </div>
+    </div>
+  </div>`);
+}
+
+// ══════════════════════════════════════════ RECHERCHE
+function openSrch(){$('srch').classList.add('on');setTimeout(()=>$('sinp').focus(),100);}
+function closeSrch(){$('srch').classList.remove('on');$('sinp').value='';resetSRes();}
+function resetSRes(){
+  $('sres').innerHTML=`<p style="font-size:.65rem;letter-spacing:.25em;text-transform:uppercase;color:var(--text-light);margin-bottom:1rem">Suggestions populaires</p>
+  <div class="srch-stags">
+    <button class="srch-stag" onclick="qs('Forêt')">Forêt Noire</button>
+    <button class="srch-stag" onclick="qs('Frais')">Fraisier</button>
+    <button class="srch-stag" onclick="qs('Opéra')">Opéra</button>
+    <button class="srch-stag" onclick="qs('Mille')">Mille-Feuille</button>
+    <button class="srch-stag" onclick="qs('Baba')">Baba au Rhum</button>
+    <button class="srch-stag" onclick="qs('Charlotte')">Charlotte</button>
+  </div>`;
+}
+function qs(q){$('sinp').value=q;doSearch(q);}
+function doSearch(v){
+  if(!v.trim()){resetSRes();return;}
+  const res=PRODS.filter(p=>p.name.toLowerCase().includes(v.toLowerCase())||p.ingredients.join(' ').toLowerCase().includes(v.toLowerCase()));
+  $('sres').innerHTML=res.length
+    ?`<p style="font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-light);margin-bottom:.8rem">${res.length} résultat${res.length>1?'s':''}</p>
+       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem">
+         ${res.map(p=>`<div style="display:flex;gap:.8rem;align-items:center;background:var(--ivory);padding:.8rem;cursor:pointer;transition:background .2s" onmouseenter="this.style.background='var(--blush)'" onmouseleave="this.style.background='var(--ivory)'" onclick="closeSrch();openPM(${p.id})">
+           <span style="font-size:2rem">${p.e}</span>
+           <div>
+             <div style="font-family:'Cormorant Garamond',serif;font-size:.92rem">${p.name}</div>
+             <div style="font-size:.68rem;color:var(--gold)">${f2(pxSize(p.prix,'petite'))} – ${f2(pxSize(p.prix,'grande'))}</div>
+           </div>
+         </div>`).join('')}
+       </div>`
+    :`<p style="color:var(--text-light);font-style:italic;font-family:'Cormorant Garamond',serif;font-size:1.1rem">Aucun résultat pour "${v}"</p>`;
+}
+
+// ══════════════════════════════════════════ INTERSECTION OBSERVER (révélation)
+function obsAll(){
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){setTimeout(()=>e.target.classList.add('vis'),i*90);io.unobserve(e.target);}
+    });
+  },{threshold:.08});
+  document.querySelectorAll('.fu:not(.vis)').forEach(el=>io.observe(el));
+}
+
+// ══════════════════════════════════════════ CLAVIER
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeCart();closeM();closeSrch();}
+  if(e.key==='/'&&!['INPUT','TEXTAREA'].includes(document.activeElement.tagName)){e.preventDefault();openSrch();}
+});
+
+// ══════════════════════════════════════════ INITIALISATION
+rProd('tous');
+updCart();
+obsAll();
+</script>
+<script>
+// ═══════════════════════════════════════════════════════════
+//  MES DÉLICES — Patch d'intégration API
+//  Ce fichier remplace les fonctions locales par de vrais
+//  appels à votre backend Render.
+//
+//  INSTRUCTIONS :
+//  1. Changez API_BASE ci-dessous par l'URL de votre backend Render
+//  2. Incluez ce script juste AVANT </body> dans index.html :
+//     <script src="api-patch.js"></script>
+// ═══════════════════════════════════════════════════════════
+
+// ─── CONFIGURATION ──────────────────────────────────────────
+// ⚠️  Remplacez cette URL par celle de votre Web Service sur Render
+const API_BASE = 'https://mesdelices-api.onrender.com';
+
+// ─── HELPERS ────────────────────────────────────────────────
+function getToken() { return localStorage.getItem('md_token'); }
+function setToken(t) { localStorage.setItem('md_token', t); }
+function clearToken() { localStorage.removeItem('md_token'); }
+
+async function api(path, options = {}) {
+  const token = getToken();
+  const res = await fetch(API_BASE + path, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: 'Bearer ' + token } : {}),
+      ...(options.headers || {}),
+    },
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Erreur serveur');
+  return data;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  AUTHENTIFICATION — Remplace doLogin() et doReg()
+// ═══════════════════════════════════════════════════════════
+
+async function doLogin() {
+  const u = $('lU')?.value?.trim();
+  const e = $('lE')?.value?.trim();
+  const pw = $('lPw')?.value;
+  if (!u) { toast('Nom d\'utilisateur requis', '⚠️'); return; }
+  if (!e?.includes('@')) { toast('Email invalide', '⚠️'); return; }
+  if (!pw || pw.length < 3) { toast('Mot de passe trop court', '⚠️'); return; }
+
+  try {
+    toast('Connexion en cours…', '⏳');
+    const data = await api('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username: u, email: e, password: pw }),
+    });
+    setToken(data.token);
+    user = data.user;
+    updAcc();
+    closeM();
+    updCart();
+    toast(`Bienvenue, ${user.prenom} ! Solde : ${f2(user.solde)}`, '🎂');
+  } catch (err) {
+    toast(err.message, '⚠️');
+  }
+}
+
+async function doReg() {
+  const u   = $('rU')?.value?.trim();
+  const p   = $('rP')?.value?.trim();
+  const n   = $('rN')?.value?.trim();
+  const e   = $('rE')?.value?.trim();
+  const tel = $('rT')?.value?.trim();
+  const pw  = $('rPw')?.value;
+  const pw2 = $('rPw2')?.value;
+  const cgu = $('rCgu')?.checked;
+  const sub = $('rSub')?.checked;
+
+  if (!u) { toast('Nom d\'utilisateur requis', '⚠️'); return; }
+  if (!p || !n) { toast('Prénom et nom requis', '⚠️'); return; }
+  if (!e?.includes('@')) { toast('Email invalide', '⚠️'); return; }
+  if (!pw || pw.length < 6) { toast('Mot de passe : 6 caractères min.', '⚠️'); return; }
+  if (pw !== pw2) { toast('Mots de passe différents', '⚠️'); return; }
+  if (!cgu) { toast('Acceptez les CGU pour continuer', '⚠️'); return; }
+
+  try {
+    toast('Création du compte…', '⏳');
+    const data = await api('/api/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ username: u, prenom: p, nom: n, email: e, telephone: tel, password: pw, newsletter: sub }),
+    });
+    setToken(data.token);
+    user = data.user;
+    updAcc();
+    closeM();
+    updCart();
+    toast(`Compte créé ! Bienvenue, ${u} 🎉`, '🎉');
+  } catch (err) {
+    toast(err.message, '⚠️');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DÉCONNEXION
+// ═══════════════════════════════════════════════════════════
+function logout() {
+  user = null;
+  clearToken();
+  updAcc();
+  closeM();
+  cart = [];
+  updCart();
+  toast('À bientôt ! 👋', '👋');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RECHARGE — Remplace processRecharge()
+// ═══════════════════════════════════════════════════════════
+async function processRecharge() {
+  const amt = parseFloat($('rchAmt')?.value);
+  if (!amt || amt < 200) { toast('Montant minimum 200 FCFA', '⚠️'); return; }
+  if (!selectedPayMethod) { toast('Veuillez choisir un mode de paiement', '⚠️'); return; }
+  const phone = $('rcPayPhone')?.value?.replace(/\s/g, '');
+  if (!phone || phone.length < 8) { toast('Numéro de téléphone invalide', '⚠️'); return; }
+
+  closeM();
+  toast(`Traitement du paiement via ${selectedPayMethod.toUpperCase()}…`, '⏳');
+
+  // Simulation de 2s (en production, intégrez CinetPay / FedaPay)
+  await new Promise(r => setTimeout(r, 2000));
+
+  try {
+    const data = await api('/api/users/recharge', {
+      method: 'POST',
+      body: JSON.stringify({ montant: amt, methode: selectedPayMethod }),
+    });
+    user.solde = data.solde;
+    updAcc();
+    updCart();
+    toast(`${f2(amt)} crédités sur votre compte !`, '💳');
+    selectedPayMethod = null;
+  } catch (err) {
+    toast(err.message, '⚠️');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RETRAIT — Remplace processWithdraw()
+// ═══════════════════════════════════════════════════════════
+async function processWithdraw() {
+  const amt = parseFloat($('wdAmt')?.value);
+  if (!amt || amt < 200) { toast('Montant minimum 200 FCFA', '⚠️'); return; }
+  if (amt > user.solde) { toast('Solde insuffisant', '⚠️'); return; }
+  if (!selectedWithdrawMethod) { toast('Choisissez un mode de retrait', '⚠️'); return; }
+  const phone = $('wdPhone')?.value?.replace(/\s/g, '');
+  if (!phone || phone.length < 8) { toast('Numéro invalide', '⚠️'); return; }
+
+  closeM();
+  toast(`Traitement du retrait vers ${selectedWithdrawMethod.toUpperCase()}…`, '⏳');
+  await new Promise(r => setTimeout(r, 2000));
+
+  try {
+    const data = await api('/api/users/retrait', {
+      method: 'POST',
+      body: JSON.stringify({ montant: amt, methode: selectedWithdrawMethod }),
+    });
+    user.solde = data.solde;
+    updAcc();
+    toast(`${f2(amt)} transférés vers ${selectedWithdrawMethod.toUpperCase()}`, '💸');
+    selectedWithdrawMethod = null;
+  } catch (err) {
+    toast(err.message, '⚠️');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COMMANDE — Remplace confirmOrder()
+// ═══════════════════════════════════════════════════════════
+async function confirmOrder(total) {
+  if (!user) return;
+  const addr = $('addrInp')?.value?.trim();
+  if (!addr) {
+    const errEl = $('addrErr');
+    const inp = $('addrInp');
+    if (errEl) errEl.classList.add('show');
+    if (inp) { inp.classList.add('error'); inp.focus(); }
+    toast('Veuillez indiquer votre adresse de livraison', '⚠️');
+    return;
+  }
+
+  // Préparer les articles dans le format attendu par l'API
+  const articles = cart.map(c => ({
+    id          : c.id,
+    name        : c.name,
+    e           : c.e,
+    size        : c.size,
+    prix_unitaire: c.price,
+    quantite    : c.qty,
+    isFree      : c.isFree,
+  }));
+
+  try {
+    toast('Confirmation de la commande…', '⏳');
+    const data = await api('/api/commandes', {
+      method: 'POST',
+      body: JSON.stringify({ articles, adresse: addr }),
+    });
+
+    // Mettre à jour l'état local
+    user.solde = data.nouveau_solde;
+    user.gateaux_achetes = data.gateaux_achetes;
+    cart = [];
+    updCart();
+    updAcc();
+    closeM();
+
+    toast(`Commande #${data.commande_id} confirmée ! Livreur : ${data.livreur_nom} 🛵`, '🎂');
+  } catch (err) {
+    toast(err.message, '⚠️');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  AUTO-LOGIN — Restaurer la session depuis le token
+// ═══════════════════════════════════════════════════════════
+async function tryAutoLogin() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const data = await api('/api/users/me');
+    user = data;
+    updAcc();
+    updCart();
+  } catch {
+    // Token expiré ou invalide → on efface
+    clearToken();
+  }
+}
+
+// Lancer l'auto-login au chargement
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(tryAutoLogin, 500); // après l'initialisation du HTML
+});
+
+console.log('✅ Mes Délices API Patch chargé — Backend :', API_BASE);
+
+</script>
+</body>
+</html>
